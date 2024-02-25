@@ -3,8 +3,10 @@
   "language": "en",
   "words": [
     "clippy",
+    "etag",
     "rustlang",
-    "rustup"
+    "rustup",
+    "serde"
   ],
   "overrides": [
     {
