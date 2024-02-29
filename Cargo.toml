@@ -1,0 +1,8 @@
+[package]
+name = "azure-sdk-for-rust-proto"
+version = "0.1.0"
+edition = "2021"
+repository = "https://github.com/heaths/azure-sdk-for-rust-proto"
+license = "MIT"
+
+[dependencies]
