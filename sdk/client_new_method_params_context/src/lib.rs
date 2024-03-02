@@ -68,6 +68,7 @@ impl SecretClient {
         let mut request = Request::new(url, "GET");
         request.set_json(&SetSecretRequest {
             value: value.into(),
+            properties: options.and_then(|v| v.properties),
             ..Default::default()
         })?;
 
