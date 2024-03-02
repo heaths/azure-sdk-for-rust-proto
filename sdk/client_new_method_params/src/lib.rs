@@ -1,3 +1,5 @@
+#![doc = include_str!("../README.md")]
+
 mod models;
 
 use azure_core::{
@@ -17,15 +19,9 @@ impl SecretClient {
     pub fn new(
         endpoint: impl AsRef<str>,
         credential: Arc<dyn TokenCredential>,
-        options: Option<&SecretClientOptions>,
+        options: Option<SecretClientOptions>,
     ) -> Result<Self> {
-        // TODO: This is inefficient to clone unconditionally. May as well let the caller do it if necessary, which is likely rare.
-        let options = if let Some(options) = options {
-            options.clone()
-        } else {
-            SecretClientOptions::default()
-        };
-
+        let options = options.unwrap_or_default();
         let mut endpoint = Url::parse(endpoint.as_ref())?;
         endpoint
             .query_pairs_mut()

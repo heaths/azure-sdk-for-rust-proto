@@ -2,9 +2,11 @@ use crate::{context::Context, request::Request, response::Response};
 use std::sync::Arc;
 
 mod auth;
+mod custom_header;
 mod transport;
 
 pub use auth::*;
+pub use custom_header::*;
 pub use transport::*;
 
 pub type PolicyResult = crate::error::Result<Response>;

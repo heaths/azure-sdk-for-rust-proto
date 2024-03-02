@@ -11,7 +11,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         api_version: "7.4".to_string(),
         ..Default::default()
     };
-    let client = SecretClient::new(endpoint, credential, Some(&options))?;
+    let client = SecretClient::new(endpoint, credential, Some(options))?;
 
     let response = client
         .set_secret("secret-name", "secret-value", None)
