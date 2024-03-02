@@ -3,6 +3,12 @@
 This is a prototype of using a client "constructor" - an idiomatic `new` method - and passing method parameters for
 required URL or query string parameters, as well as any required body.
 
+## Examples
+
+* [set_secret](examples/set_secret.rs)
+
+### Client options
+
 Both the client and method take an optional client options bag via `Option<T>`. Options implement `Clone` and can be
 cloned for those customers who want to build multiple clients from a single client options, or vary method calls.
 
