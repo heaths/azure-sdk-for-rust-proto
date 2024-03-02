@@ -1,7 +1,8 @@
 use crate::{
+    context::Context,
     options::TransportOptions,
     policies::{Policy, PolicyResult},
-    Context, Request,
+    request::Request,
 };
 use std::sync::Arc;
 

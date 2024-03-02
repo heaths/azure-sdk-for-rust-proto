@@ -1,0 +1,5 @@
+[package]
+name = "azure_client_new_method_builder"
+version = "0.1.0"
+edition = "2021"
+publish = false

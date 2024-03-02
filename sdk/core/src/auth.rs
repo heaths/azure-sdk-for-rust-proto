@@ -1,1 +1,1 @@
-pub trait TokenCredential {}
+pub trait TokenCredential: std::fmt::Debug + Send + Sync {}

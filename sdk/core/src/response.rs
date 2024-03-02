@@ -1,4 +1,4 @@
-use crate::Headers;
+use crate::headers::Headers;
 use bytes::Bytes;
 use futures::{Stream, StreamExt};
 use serde::de::DeserializeOwned;

@@ -10,6 +10,7 @@ rust-version = "1.76"
 [workspace.dependencies]
 async-trait = "0.1"
 azure_core = { version = "0.1.0", path = "sdk/core" }
+azure_identity = { version = "0.1.0", path = "sdk/identity" }
 bytes = "1.0"
 futures = "0.3"
 serde_json = "1.0"
