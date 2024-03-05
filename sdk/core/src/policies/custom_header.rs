@@ -25,7 +25,7 @@ impl CustomHeaderPolicy {
 impl Policy for CustomHeaderPolicy {
     async fn send(
         &self,
-        ctx: &Context,
+        ctx: &mut Context,
         request: &mut Request,
         next: &[Arc<dyn Policy>],
     ) -> PolicyResult {

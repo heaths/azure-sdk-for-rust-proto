@@ -53,6 +53,7 @@ impl SecretClient {
     #[allow(unused_variables)]
     pub async fn set_secret<N, V>(
         &self,
+        ctx: &mut Context,
         name: N,
         value: V,
         options: Option<SetSecretOptions>,
@@ -70,7 +71,7 @@ impl SecretClient {
             ..Default::default()
         })?;
 
-        let mut ctx = Context::default();
+        let mut ctx = Context::with_context(ctx);
         self.pipeline.send(&mut ctx, &mut request).await
     }
 }

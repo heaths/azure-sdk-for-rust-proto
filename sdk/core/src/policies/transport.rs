@@ -21,7 +21,7 @@ impl TransportPolicy {
 impl Policy for TransportPolicy {
     async fn send(
         &self,
-        ctx: &Context,
+        ctx: &mut Context,
         request: &mut Request,
         _next: &[Arc<dyn Policy>],
     ) -> PolicyResult {

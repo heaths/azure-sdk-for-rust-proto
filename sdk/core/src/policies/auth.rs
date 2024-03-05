@@ -22,7 +22,7 @@ impl ApiKeyAuthenticationPolicy {
 impl Policy for ApiKeyAuthenticationPolicy {
     async fn send(
         &self,
-        ctx: &Context,
+        ctx: &mut Context,
         request: &mut Request,
         next: &[Arc<dyn Policy>],
     ) -> PolicyResult {

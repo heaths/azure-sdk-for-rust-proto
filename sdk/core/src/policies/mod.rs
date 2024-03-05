@@ -15,7 +15,7 @@ pub type PolicyResult = crate::error::Result<Response>;
 pub trait Policy: Send + Sync + std::fmt::Debug {
     async fn send(
         &self,
-        ctx: &Context,
+        ctx: &mut Context,
         request: &mut Request,
         next: &[Arc<dyn Policy>],
     ) -> PolicyResult;
