@@ -55,7 +55,7 @@ impl Context {
             .map(|removed| removed.downcast().expect("failed to unwrap downcast"))
     }
 
-    pub fn get<E>(&self) -> Option<&E>
+    pub fn value<E>(&self) -> Option<&E>
     where
         E: Send + Sync + 'static,
     {
@@ -115,8 +115,8 @@ mod tests {
         assert_eq!(parent.len(), 1);
         assert_eq!(sut.len(), 2);
 
-        assert_eq!(parent.get::<A>().expect("expected value").0, "baz");
-        assert_eq!(sut.get::<A>().expect("expected value").0, "bar");
-        assert_eq!(sut.get::<B>().expect("expected value").0, 1);
+        assert_eq!(parent.value::<A>().expect("expected value").0, "baz");
+        assert_eq!(sut.value::<A>().expect("expected value").0, "bar");
+        assert_eq!(sut.value::<B>().expect("expected value").0, 1);
     }
 }

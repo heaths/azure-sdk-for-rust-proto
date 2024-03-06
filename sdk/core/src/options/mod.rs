@@ -23,12 +23,12 @@ mod builder {
     pub trait ClientBuilder {
         fn options(&mut self) -> &mut ClientOptions;
 
-        fn retry(&mut self, retry: impl Into<RetryOptions>) -> &mut Self {
+        fn with_retry(&mut self, retry: impl Into<RetryOptions>) -> &mut Self {
             self.options().retry = retry.into();
             self
         }
 
-        fn transport(&mut self, transport: impl Into<TransportOptions>) -> &mut Self {
+        fn with_transport(&mut self, transport: impl Into<TransportOptions>) -> &mut Self {
             self.options().transport = transport.into();
             self
         }
