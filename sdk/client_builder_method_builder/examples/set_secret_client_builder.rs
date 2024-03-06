@@ -9,12 +9,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let credential = Arc::new(DefaultAzureCredential::default());
     let client = SecretClient::builder(endpoint, credential)?
-        .retry(RetryOptions::exponential(ExponentialRetryOptions::default()))
+        .with_retry(RetryOptions::exponential(ExponentialRetryOptions::default()))
         .build();
 
     let response = client
         .set_secret("secret-name", "secret-value")
-        .properties(SecretProperties { enabled: false })
+        .with_properties(SecretProperties { enabled: false })
         .send()
         .await?;
 

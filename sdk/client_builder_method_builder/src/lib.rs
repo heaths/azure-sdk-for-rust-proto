@@ -29,12 +29,12 @@ impl SecretClientBuilder {
         })
     }
 
-    pub fn api_version(&mut self, api_version: impl Into<String>) -> &mut Self {
+    pub fn with_api_version(&mut self, api_version: impl Into<String>) -> &mut Self {
         self.api_version = Some(api_version.into());
         self
     }
 
-    pub fn scopes(&mut self, scopes: &[&str]) -> &mut Self {
+    pub fn with_scopes(&mut self, scopes: &[&str]) -> &mut Self {
         self.scopes = Some(scopes.iter().map(|scope| (*scope).to_owned()).collect());
         self
     }
@@ -122,7 +122,7 @@ mod set_secret {
     }
 
     impl SetSecretRequestBuilder {
-        pub fn properties(&mut self, properties: SecretProperties) -> &mut Self {
+        pub fn with_properties(&mut self, properties: SecretProperties) -> &mut Self {
             self.properties = Some(properties);
             self
         }
