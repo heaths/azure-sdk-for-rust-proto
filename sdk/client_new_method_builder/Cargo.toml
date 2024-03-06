@@ -3,3 +3,12 @@ name = "azure_client_new_method_builder"
 version = "0.1.0"
 edition = "2021"
 publish = false
+
+[dependencies]
+azure_core = { workspace = true, features = ["builder", "context"] }
+futures = { workspace = true }
+serde = { workspace = true }
+
+[dev-dependencies]
+azure_identity = { workspace = true }
+tokio = { workspace = true }

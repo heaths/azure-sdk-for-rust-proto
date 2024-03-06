@@ -7,7 +7,7 @@ Nothing herein should be interpreted as a matter of policy.
 
 ## Examples
 
-Find all examples under the [`sdk/`](sdk/) directory. The following are what we are focusing on currently:
+Find all examples under the [`sdk/`](sdk/) directory. The following, in no particular order, are what we are focusing on currently:
 
 * [client_new_method_params]
 
@@ -31,7 +31,15 @@ Find all examples under the [`sdk/`](sdk/) directory. The following are what we 
 
   This prototype uses builders for both client - and, more notably, client options - as well as service method calls.
 
+* [client_new_method_builder]
+
+  A combination of [client_new_method_params] to construct clients using `new(...)` and [client_builder_method_builder]
+  using a builder for methods to optionally configure per-call settings.
+
+  This is similar to how the [AWS SDK](https://awslabs.github.io/aws-sdk-rust/) is defined.
+
 [client_builder_method_builder]: sdk/client_builder_method_builder/examples/set_secret_client_builder.rs
+[client_new_method_builder]: sdk/client_new_method_builder/examples/set_secret_method_builder.rs
 [client_new_method_params]: sdk/client_new_method_params/examples/set_secret.rs
 [client_new_method_params_context]: sdk/client_new_method_params_context/examples/set_secret_with_context.rs
 
