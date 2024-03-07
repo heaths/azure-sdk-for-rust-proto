@@ -1,7 +1,7 @@
 use azure_client_new_method_builder::{
     Secret, SecretClient, SecretClientOptions, SecretProperties,
 };
-use azure_core::{ClientOptions, ExponentialRetryOptions, RetryOptions};
+use azure_core::{ClientOptions, Context, ExponentialRetryOptions, RetryOptions};
 use azure_identity::DefaultAzureCredential;
 use std::{env, sync::Arc};
 
@@ -19,8 +19,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
     let client = SecretClient::new(endpoint, credential, Some(options))?;
 
+    let mut ctx = Context::default();
+    ctx.insert("example".to_string());
+
     let response = client
         .set_secret("secret-name", "secret-value")
+        .with_context(ctx)
         .with_properties(SecretProperties { enabled: false })
         .send()
         .await?;

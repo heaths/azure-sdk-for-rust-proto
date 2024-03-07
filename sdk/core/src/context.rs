@@ -4,13 +4,14 @@ use std::{
     sync::Arc,
 };
 
+// TODO: If we remove len() and is_empty() - which in the Azure/azure-sdk-for-rust repo are used only in tests - we could add a parent Arc<Context> and take those everywhere else to reduce memory on Context being potentially shared across threads.
 #[derive(Clone, Debug)]
 pub struct Context {
     type_map: HashMap<TypeId, Arc<dyn Any + Send + Sync>>,
 }
 
 impl Context {
-    pub fn new() -> Self {
+    fn new() -> Self {
         Self {
             type_map: HashMap::new(),
         }

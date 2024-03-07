@@ -14,7 +14,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
     let client = SecretClient::new(endpoint, credential, Some(options))?;
 
-    let mut ctx = Context::new();
+    let mut ctx = Context::default();
     ctx.insert("example".to_string());
 
     let response = client

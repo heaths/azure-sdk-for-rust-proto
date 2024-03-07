@@ -4,7 +4,7 @@ mod models;
 
 use azure_core::{
     policies::{ApiKeyAuthenticationPolicy, Policy},
-    ClientOptions, Context, Pipeline, Request, Response, Result, TokenCredential, Url,
+    ClientOptions, Context, Pipeline, Request, Response, Result, Span, TokenCredential, Url,
 };
 pub use models::*;
 use std::{collections::HashMap, sync::Arc};
@@ -62,6 +62,9 @@ impl SecretClient {
         N: Into<String>,
         V: Into<String>,
     {
+        let mut ctx = Context::with_context(ctx);
+        ctx.insert(Span::from("SecretClient::set_secret"));
+
         let mut url = self.endpoint.clone();
         url.set_path(&format!("secrets/{}", name.into()));
 
@@ -72,7 +75,6 @@ impl SecretClient {
             ..Default::default()
         })?;
 
-        let mut ctx = Context::with_context(ctx);
         self.pipeline.send(&mut ctx, &mut request).await
     }
 }

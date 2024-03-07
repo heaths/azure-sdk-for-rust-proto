@@ -5,7 +5,7 @@ edition = "2021"
 publish = false
 
 [dependencies]
-azure_core = { workspace = true }
+azure_core = { workspace = true, features = ["context"] }
 serde = { workspace = true }
 
 [dev-dependencies]

@@ -104,13 +104,14 @@ impl SecretClient {
             name: name.into(),
             value: value.into(),
             properties: None,
+            context: None,
         }
     }
 }
 
 mod set_secret {
     use super::*;
-    use azure_core::{Context, Request};
+    use azure_core::{Context, Request, Span};
     use futures::future::BoxFuture;
 
     #[derive(Clone, Debug)]
@@ -119,18 +120,27 @@ mod set_secret {
         pub(crate) name: String,
         pub(crate) value: String,
         pub(crate) properties: Option<SecretProperties>,
+        pub(crate) context: Option<Context>,
     }
 
     impl SetSecretRequestBuilder {
+        pub fn with_context(&mut self, context: Context) -> &mut Self {
+            self.context = Some(context);
+            self
+        }
+
         pub fn with_properties(&mut self, properties: SecretProperties) -> &mut Self {
             self.properties = Some(properties);
             self
         }
 
-        pub fn send(&self) -> BoxFuture<'static, Result<Response>> {
+        pub fn send(&self) -> BoxFuture<Result<Response>> {
             Box::pin({
                 let this = self.clone();
                 async move {
+                    let mut ctx = this.context.unwrap_or_default();
+                    ctx.insert(Span::from("SecretClient::set_secret"));
+
                     let mut url = this.client.endpoint.clone();
                     url.set_path(&format!("secrets/{}", this.name));
 
@@ -142,10 +152,7 @@ mod set_secret {
                     let mut request = Request::new(url, "GET");
                     request.set_json(&body)?;
 
-                    this.client
-                        .pipeline
-                        .send(&mut Context::default(), &mut request)
-                        .await
+                    this.client.pipeline.send(&mut ctx, &mut request).await
                 }
             })
         }
