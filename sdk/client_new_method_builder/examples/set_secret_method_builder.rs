@@ -19,11 +19,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
     let client = SecretClient::new(endpoint, credential, Some(options))?;
 
+    // Simple client method call.
+    let response = client
+        .set_secret("secret-name", "secret-value")
+        .send()
+        .await?;
+
+    let secret: Secret = response.json().await?;
+    println!("set {} version {}", secret.name, secret.version);
+
+    // More complex client method call.
     let mut ctx = Context::default();
     ctx.insert("example".to_string());
 
     let response = client
-        .set_secret("secret-name", "secret-value")
+        .set_secret("secret-name", "rotated-value")
         .with_context(ctx)
         .with_properties(SecretProperties { enabled: false })
         .send()
