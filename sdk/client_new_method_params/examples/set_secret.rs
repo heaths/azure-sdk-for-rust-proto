@@ -43,11 +43,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .await?;
 
+    // Option 2: Implement async TryFrom<Response> for models, which customers can also do. Options are not mutually exclusive.
+    // Note: async TryFrom<T> is still experimental but under consideration.
     let secret: Secret = response.json().await?;
     println!("set {} version {}", secret.name, secret.version);
 
-    // Option 2: Implement async TryFrom<Response> for models, which customers can also do. Options are not mutually exclusive.
-    // Note: async TryFrom<T> is still experimental but under consideration.
+    // Concurrent client method calls with same options.
+    let mut ctx = Context::default();
+    ctx.insert("example".to_string());
+
+    let options = SetSecretOptions {
+        content_type: Some("text/plain".to_string()),
+        context: Some(ctx),
+        ..Default::default()
+    };
+
+    let (_, _) = tokio::join!(
+        client.set_secret("foo", "foo-value", Some(options.clone())),
+        client.set_secret("bar", "bar-value", Some(options.clone())),
+    );
 
     Ok(())
 }

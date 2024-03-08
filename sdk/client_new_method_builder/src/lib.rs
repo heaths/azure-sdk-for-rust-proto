@@ -57,6 +57,7 @@ impl SecretClient {
             client: self.clone(),
             name: name.into(),
             value: value.into(),
+            content_type: None,
             properties: None,
             context: None,
         }
@@ -88,11 +89,17 @@ mod set_secret {
         pub(crate) client: SecretClient,
         pub(crate) name: String,
         pub(crate) value: String,
+        pub(crate) content_type: Option<String>,
         pub(crate) properties: Option<SecretProperties>,
         pub(crate) context: Option<Context>,
     }
 
     impl SetSecretRequestBuilder {
+        pub fn with_content_type(&mut self, content_type: impl Into<String>) -> &mut Self {
+            self.content_type = Some(content_type.into());
+            self
+        }
+
         pub fn with_context(&mut self, context: Context) -> &mut Self {
             self.context = Some(context);
             self

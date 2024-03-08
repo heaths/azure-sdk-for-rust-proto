@@ -21,7 +21,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Simple client method call.
     let response = client
-        .set_secret(&mut Context::default(), "secret-name", "secret-value", None)
+        .set_secret(&Context::default(), "secret-name", "secret-value", None)
         .await?;
 
     let secret: Secret = response.json().await?;
@@ -33,7 +33,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client
         .set_secret(
-            &mut ctx,
+            &ctx,
             "secret-name",
             "rotated-value",
             Some(SetSecretOptions {
@@ -43,11 +43,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         )
         .await?;
 
+    // Option 2: Implement async TryFrom<Response> for models, which customers can also do. Options are not mutually exclusive.
+    // Note: async TryFrom<T> is still experimental but under consideration.
     let secret: Secret = response.json().await?;
     println!("set {} version {}", secret.name, secret.version);
 
-    // Option 2: Implement async TryFrom<Response> for models, which customers can also do. Options are not mutually exclusive.
-    // Note: async TryFrom<T> is still experimental but under consideration.
+    // Concurrent client method calls with same options.
+    let mut ctx = Context::default();
+    ctx.insert("example".to_string());
+
+    let options = SetSecretOptions {
+        content_type: Some("text/plain".to_string()),
+        ..Default::default()
+    };
+
+    let (_, _) = tokio::join!(
+        client.set_secret(&ctx, "foo", "foo-value", Some(options.clone())),
+        client.set_secret(&ctx, "bar", "bar-value", Some(options.clone())),
+    );
 
     Ok(())
 }

@@ -36,5 +36,28 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let secret: Secret = response.json().await?;
     println!("set {} version {}", secret.name, secret.version);
 
+    // Concurrent client method calls with same options.
+    let mut ctx = Context::default();
+    ctx.insert("example".to_string());
+
+    let (_, _) = tokio::join!(
+        async {
+            client
+                .set_secret("foo", "foo-value")
+                .with_content_type("text/plain")
+                .with_context(ctx.clone())
+                .send()
+                .await
+        },
+        async {
+            client
+                .set_secret("bar", "bar-value")
+                .with_content_type("text/plain")
+                .with_context(ctx.clone())
+                .send()
+                .await
+        },
+    );
+
     Ok(())
 }

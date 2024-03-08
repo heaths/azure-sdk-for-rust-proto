@@ -53,7 +53,7 @@ impl SecretClient {
     #[allow(unused_variables)]
     pub async fn set_secret<N, V>(
         &self,
-        ctx: &mut Context,
+        ctx: &Context,
         name: N,
         value: V,
         options: Option<SetSecretOptions>,
