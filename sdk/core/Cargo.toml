@@ -12,6 +12,9 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 url = { workspace = true }
 
+[dev-dependencies]
+tokio = { workspace = true, features = ["time"] }
+
 [features]
 builder = []
 context = []

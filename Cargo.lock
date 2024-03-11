@@ -85,6 +85,7 @@ dependencies = [
  "futures",
  "serde",
  "serde_json",
+ "tokio",
  "url",
 ]
 
