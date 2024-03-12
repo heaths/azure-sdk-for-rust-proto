@@ -1,4 +1,7 @@
 {
+  "markdownlint.config": {
+    "no-emphasis-as-heading": false
+  },
   "rust-analyzer.cargo.features": "all",
   "rust-analyzer.check.command": "clippy",
   "rust-analyzer.checkOnSave": true
