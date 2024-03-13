@@ -1,0 +1,13 @@
+[package]
+name = "azure_client_new_methods_params_struct"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+azure_core = { workspace = true, features = ["context"] }
+serde = { workspace = true }
+
+[dev-dependencies]
+azure_identity = { workspace = true }
+tokio = { workspace = true }
