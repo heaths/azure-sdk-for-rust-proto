@@ -3,11 +3,13 @@
   "language": "en",
   "words": [
     "clippy",
+    "discoverability",
     "etag",
     "keyvault",
     "rustlang",
     "rustup",
     "serde",
+    "structs",
     "typestate"
   ],
   "overrides": [

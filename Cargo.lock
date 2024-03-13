@@ -77,6 +77,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "azure_client_new_methods_params_struct"
+version = "0.1.0"
+dependencies = [
+ "azure_core",
+ "azure_identity",
+ "serde",
+ "tokio",
+]
+
+[[package]]
 name = "azure_core"
 version = "0.1.0"
 dependencies = [
