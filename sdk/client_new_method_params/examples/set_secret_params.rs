@@ -17,7 +17,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             ..Default::default()
         },
     };
-    let client = SecretClient::new(endpoint, credential, Some(options))?;
+
+    // Just showing that we can do both
+    let client = SecretClient::new(endpoint.clone(), credential.clone(), Some(&options))?;
+    let client2 = SecretClient::new(endpoint, credential, Some(options))?;
 
     // Simple client method call.
     let response = client
@@ -58,9 +61,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         ..Default::default()
     };
 
-    let (_, _) = tokio::join!(
+    let (_, _, _) = tokio::join!(
         client.set_secret("foo", "foo-value", Some(options.clone())),
-        client.set_secret("bar", "bar-value", Some(options.clone())),
+        client.set_secret2("bar", "bar-value", Some(&options)),
+        client.set_secret2("bar", "bar-value", Some(&options)),
     );
 
     Ok(())
