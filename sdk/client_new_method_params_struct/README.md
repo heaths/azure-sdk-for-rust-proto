@@ -16,7 +16,7 @@ cloned for those customers who want to build multiple clients from a single clie
 use std::sync::Arc;
 use azure_core::{ClientOptions, policies::CustomHeaderPolicy};
 use azure_identity::{DefaultAzureCredential};
-use azure_client_new_methods_params::{SecretClient, SecretClientOptions};
+use azure_client_new_methods_params_struct::{SecretClient, SecretClientOptions};
 
 let credential = Arc::new(DefaultAzureCredential::default());
 let mut options = SecretClientOptions {

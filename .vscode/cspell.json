@@ -9,6 +9,7 @@
     "rustlang",
     "rustup",
     "serde",
+    "struct",
     "structs",
     "typestate"
   ],
