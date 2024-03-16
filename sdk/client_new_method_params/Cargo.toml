@@ -3,11 +3,17 @@ name = "azure_client_new_methods_params"
 version = "0.1.0"
 edition = "2021"
 publish = false
+rust-version = { workspace = true }
 
 [dependencies]
+async-trait = { workspace = true }
 azure_core = { workspace = true, features = ["context"] }
+mockall = { workspace = true, optional = true }
 serde = { workspace = true }
 
 [dev-dependencies]
 azure_identity = { workspace = true }
 tokio = { workspace = true }
+
+[features]
+mock = [ "dep:mockall" ]

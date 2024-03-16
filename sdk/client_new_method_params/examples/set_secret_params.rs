@@ -1,5 +1,6 @@
 use azure_client_new_methods_params::{
-    Secret, SecretClient, SecretClientOptions, SecretProperties, SetSecretOptions,
+    Secret, SecretClient, SecretClientMethods, SecretClientOptions, SecretProperties,
+    SetSecretOptions,
 };
 use azure_core::{ClientOptions, Context, ExponentialRetryOptions, RetryOptions};
 use azure_identity::DefaultAzureCredential;

@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 #[derive(Clone, Debug, Deserialize)]
+#[cfg_attr(feature = "mock", derive(Serialize))]
 pub struct Secret {
     pub name: String,
     pub version: String,

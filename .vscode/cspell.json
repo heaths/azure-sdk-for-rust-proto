@@ -2,10 +2,12 @@
   "version": "0.2",
   "language": "en",
   "words": [
+    "automock",
     "clippy",
     "discoverability",
     "etag",
     "keyvault",
+    "mockall",
     "rustlang",
     "rustup",
     "serde",

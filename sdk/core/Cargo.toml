@@ -3,6 +3,7 @@ name = "azure_core"
 version = "0.1.0"
 edition = "2021"
 publish = false
+rust-version = { workspace = true }
 
 [dependencies]
 async-trait = { workspace = true }
