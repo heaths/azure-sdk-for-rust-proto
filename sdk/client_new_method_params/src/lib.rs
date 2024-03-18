@@ -9,6 +9,28 @@ use azure_core::{
 pub use models::*;
 use std::{collections::HashMap, sync::Arc};
 
+// NOTE: Implementing automock forces 'static lifetime on arguments.
+#[cfg_attr(feature = "mock", mockall::automock)]
+#[async_trait::async_trait]
+pub trait SecretClientMethods {
+    fn endpoint(&self) -> &Url {
+        unimplemented!()
+    }
+
+    async fn set_secret<N, V>(
+        &self,
+        _name: N,
+        _value: V,
+        _options: Option<SetSecretOptions>,
+    ) -> azure_core::Result<Response>
+    where
+        N: Into<String> + Send + 'static,
+        V: Into<String> + Send + 'static,
+    {
+        unimplemented!()
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct SecretClient {
     endpoint: Url,
@@ -45,21 +67,24 @@ impl SecretClient {
             ),
         })
     }
+}
 
-    pub fn endpoint(&self) -> &Url {
+#[async_trait::async_trait]
+impl SecretClientMethods for SecretClient {
+    fn endpoint(&self) -> &Url {
         &self.endpoint
     }
 
     #[allow(unused_variables)]
-    pub async fn set_secret<N, V>(
+    async fn set_secret<N, V>(
         &self,
         name: N,
         value: V,
         options: Option<SetSecretOptions>,
     ) -> azure_core::Result<Response>
     where
-        N: Into<String>,
-        V: Into<String>,
+        N: Into<String> + Send,
+        V: Into<String> + Send,
     {
         let options = options.unwrap_or_default();
 
@@ -101,4 +126,34 @@ pub struct SetSecretOptions {
     pub content_type: Option<String>,
     pub tags: Option<HashMap<String, String>>,
     pub context: Option<Context>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use azure_core::{json::to_json, stream::BytesStream, Headers};
+
+    #[tokio::test]
+    async fn test_set_secret() {
+        let mut client = MockSecretClientMethods::new();
+        client
+            .expect_set_secret()
+            .returning(|name: &str, value: &str, _| {
+                let secret = Secret {
+                    name: name.to_string(),
+                    version: value.to_string(),
+                    properties: SecretProperties { enabled: true },
+                };
+                let json: BytesStream = to_json(&secret).expect("serialize Secret").into();
+                Ok(Response::new(200, Headers::default(), Box::pin(json)))
+            });
+
+        let response = client.set_secret("test-secret", "secret-value", None).await;
+        let secret: Secret = response
+            .expect("expected response")
+            .json()
+            .await
+            .expect("expected Secret");
+        assert!(secret.properties.enabled);
+    }
 }
