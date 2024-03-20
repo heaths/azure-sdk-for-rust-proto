@@ -1,5 +1,5 @@
 use azure_core::{
-    ClientMethodOptionsBuilder, ClientOptionsBuilder, Context, ExponentialRetryOptions,
+    ClientMethodOptionsBuilder as _, ClientOptionsBuilder as _, Context, ExponentialRetryOptions,
     RetryOptions,
 };
 use azure_identity::DefaultAzureCredential;
