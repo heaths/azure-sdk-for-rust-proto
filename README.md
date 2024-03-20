@@ -53,6 +53,9 @@ Find all examples under the [`sdk/`](sdk/) directory. The following are what we 
      discoverability is improved. If someone added `use azure_core::*` they would be imported.
 
      > TODO: Is there some way we can "bootstrap" the import?
+     >
+     > Perhaps we could use a macro instead: pass it whatever the client options or client method options field is named,
+     > and the macro from `azure_core` will declare all getters and setters directly on the client- or call-specific options.
 
    * If we take an `Option<SetClientOptions>` or `Option<SetSecretOptions>`, we still likely end up allocating a `Default` implementation
      unless we use a lazy allocation.
