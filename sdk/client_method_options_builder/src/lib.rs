@@ -132,7 +132,7 @@ impl SetSecretOptions {
 
 pub mod builder {
     use super::*;
-    use azure_core::{ClientMethodOptionsBuilder, ClientOptionsBuilder};
+    use azure_core::ClientMethodOptionsBuilder;
 
     #[derive(Default)]
     pub struct SecretClientOptionsBuilder {
@@ -149,18 +149,10 @@ pub mod builder {
             self
         }
 
+        azure_core::client_options_builder!(options.client_options);
+
         pub fn build(&self) -> SecretClientOptions {
             self.options.clone()
-        }
-    }
-
-    impl ClientOptionsBuilder for SecretClientOptionsBuilder {
-        fn options(&self) -> &ClientOptions {
-            &self.options.client_options
-        }
-
-        fn options_mut(&mut self) -> &mut ClientOptions {
-            &mut self.options.client_options
         }
     }
 

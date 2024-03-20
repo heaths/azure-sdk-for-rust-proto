@@ -67,65 +67,74 @@ mod builder {
         }
     }
 
-    pub trait ClientOptionsBuilder {
-        fn options(&self) -> &ClientOptions;
+    #[macro_export]
+    macro_rules! client_options_builder {
+        ($($field:ident).*) => {
+            pub fn context(&self) -> &$crate::Context {
+                &self.$($field).*.context
+            }
 
-        fn options_mut(&mut self) -> &mut ClientOptions;
+            pub fn with_context(&mut self, context: $crate::Context) -> &mut Self {
+                self.$($field).*.context = context;
+                self
+            }
 
-        fn context(&self) -> &Context {
-            &self.options().context
-        }
+            pub fn retry(&self) -> &$crate::RetryOptions {
+                &self.$($field).*.retry
+            }
 
-        fn with_context(&mut self, context: Context) -> &mut Self {
-            self.options_mut().context = context;
-            self
-        }
+            pub fn with_retry(
+                &mut self,
+                retry: impl ::std::convert::Into<$crate::RetryOptions>,
+            ) -> &mut Self {
+                self.$($field).*.retry = retry.into();
+                self
+            }
 
-        fn retry(&self) -> &RetryOptions {
-            &self.options().retry
-        }
+            pub fn transport(&self) -> &$crate::TransportOptions {
+                &self.$($field).*.transport
+            }
 
-        fn with_retry(&mut self, retry: impl Into<RetryOptions>) -> &mut Self {
-            self.options_mut().retry = retry.into();
-            self
-        }
+            pub fn with_transport(
+                &mut self,
+                transport: impl ::std::convert::Into<$crate::TransportOptions>,
+            ) -> &mut Self {
+                self.$($field).*.transport = transport.into();
+                self
+            }
 
-        fn transport(&self) -> &TransportOptions {
-            &self.options().transport
-        }
+            pub fn per_call_policies(&self) -> &Vec<Arc<dyn $crate::policies::Policy>> {
+                &self.$($field).*.per_call_policies
+            }
 
-        fn with_transport(&mut self, transport: impl Into<TransportOptions>) -> &mut Self {
-            self.options_mut().transport = transport.into();
-            self
-        }
+            pub fn with_per_call_policies(
+                &mut self,
+                per_call_policies: impl ::std::convert::Into<
+                    Vec<Arc<dyn $crate::policies::Policy>>,
+                >,
+            ) -> &mut Self {
+                self.$($field).*
+                    .per_call_policies
+                    .extend(per_call_policies.into());
+                self
+            }
 
-        fn per_call_policies(&self) -> &Vec<Arc<dyn Policy>> {
-            &self.options().per_call_policies
-        }
+            pub fn per_retry_policies(&self) -> &Vec<Arc<dyn $crate::policies::Policy>> {
+                &self.$($field).*.per_retry_policies
+            }
 
-        fn with_per_call_policies(
-            &mut self,
-            per_call_policies: impl Into<Vec<Arc<dyn Policy>>>,
-        ) -> &mut Self {
-            self.options_mut()
-                .per_call_policies
-                .extend(per_call_policies.into());
-            self
-        }
-
-        fn per_retry_policies(&self) -> &Vec<Arc<dyn Policy>> {
-            &self.options().per_retry_policies
-        }
-
-        fn with_per_retry_policies(
-            &mut self,
-            per_retry_policies: impl Into<Vec<Arc<dyn Policy>>>,
-        ) -> &mut Self {
-            self.options_mut()
-                .per_retry_policies
-                .extend(per_retry_policies.into());
-            self
-        }
+            pub fn with_per_retry_policies(
+                &mut self,
+                per_retry_policies: impl ::std::convert::Into<
+                    Vec<Arc<dyn $crate::policies::Policy>>,
+                >,
+            ) -> &mut Self {
+                self.$($field).*
+                    .per_retry_policies
+                    .extend(per_retry_policies.into());
+                self
+            }
+        };
     }
 
     pub trait ClientMethodOptionsBuilder {
