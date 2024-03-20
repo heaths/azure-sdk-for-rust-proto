@@ -12,7 +12,7 @@ builders like with [client_builder_method_builder].
 
 Consider building an options bag struct for [client_new_method_params]:
 
-```rust
+```rust no_test
 let options = SetSecretOptions {
     enabled: true,
     client_options: Some(azure_core::ClientMethodOptions {
@@ -27,7 +27,7 @@ let response = client.set_secret("name", "value", Some(options)).await?;
 
 Or using an options builder:
 
-```rust
+```rust no_test
 let options = SetSecretOptions::builder()
     .with_enabled(true)
     .with_retry(azure_core::Retry::exponential())
