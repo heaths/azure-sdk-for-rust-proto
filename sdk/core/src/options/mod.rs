@@ -103,14 +103,14 @@ mod builder {
                 self
             }
 
-            pub fn per_call_policies(&self) -> &Vec<Arc<dyn $crate::policies::Policy>> {
+            pub fn per_call_policies(&self) -> &::std::vec::Vec<::std::sync::Arc<dyn $crate::policies::Policy>> {
                 &self.$($field).*.per_call_policies
             }
 
             pub fn with_per_call_policies(
                 &mut self,
                 per_call_policies: impl ::std::convert::Into<
-                    Vec<Arc<dyn $crate::policies::Policy>>,
+                    ::std::vec::Vec<::std::sync::Arc<dyn $crate::policies::Policy>>,
                 >,
             ) -> &mut Self {
                 self.$($field).*
@@ -119,14 +119,14 @@ mod builder {
                 self
             }
 
-            pub fn per_retry_policies(&self) -> &Vec<Arc<dyn $crate::policies::Policy>> {
+            pub fn per_retry_policies(&self) -> &::std::vec::Vec<::std::sync::Arc<dyn $crate::policies::Policy>> {
                 &self.$($field).*.per_retry_policies
             }
 
             pub fn with_per_retry_policies(
                 &mut self,
                 per_retry_policies: impl ::std::convert::Into<
-                    Vec<Arc<dyn $crate::policies::Policy>>,
+                    ::std::vec::Vec<::std::sync::Arc<dyn $crate::policies::Policy>>,
                 >,
             ) -> &mut Self {
                 self.$($field).*
