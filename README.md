@@ -32,7 +32,36 @@ Find all examples under the [`sdk/`](sdk/) directory. The following are what we 
 
    Options structs should derive or implement `Default` to make them future-proof barring breaking changes like adding required fields.
 
-2. [client_builder_method_builder]
+1. [client_method_options_builder]
+
+   This combines [client_new_method_params] and [client_builder_method_builder] to provide better discoverability (with a caveat)
+   and ease of use e.g., passing in a `&str` instead of `"a string".to_string()` and option bag reuse.
+   Methods take parameters as in [client_new_method_params] and only the options have a builder similar to [client_builder_method_builder].
+
+   **Pros**
+
+   * Similar feel to most other languages.
+   * Can share options across multiple, distinct client method calls.
+   * Can mitigate ambiguous or conflicting options using a [typestate builder pattern].
+   * Can validate options beyond type safety since setters are used.
+
+   **Cons**
+
+   * The noted caveat is that `azure_core::ClientOptionsBuilder` or `azure_core::ClientMethodOptionsBuilder` traits have to be
+     imported to see their methods, so that hurts discoverability. rust-analyzer does recommend this, but even in Visual Studio Code
+     you can't simply `Ctrl+.` to have rust-analyzer do it for you like in many similar cases. Once it's imported, though,
+     discoverability is improved. If someone added `use azure_core::*` they would be imported.
+
+     > TODO: Is there some way we can "bootstrap" the import?
+
+   * If we take an `Option<SetClientOptions>` or `Option<SetSecretOptions>`, we still likely end up allocating a `Default` implementation
+     unless we use a lazy allocation.
+
+   **Decision**
+
+   > TODO: Not yet discussed.
+
+1. [client_builder_method_builder]
 
    Builders are fairly common in Rust, used in the likes of the AWS SDK (only for method calls), Bevy (ECS game engine),
    and some others. I wouldn't go so far as saying they are idiomatic, though: many projects even for cloud-related crates
@@ -66,7 +95,7 @@ Find all examples under the [`sdk/`](sdk/) directory. The following are what we 
    Even if we do not end up using builders for client construction and method calls, there may still be limited use cases
    for which the [typestate builder pattern] is well-suited like for constructing SAS URLs.
 
-3. [client_new_method_builder]
+1. [client_new_method_builder]
 
    A combination of [client_new_method_params] to construct clients using `new(...)` and [client_builder_method_builder]
    using a builder for methods to optionally configure per-call settings.
@@ -92,7 +121,7 @@ Find all examples under the [`sdk/`](sdk/) directory. The following are what we 
    across multiple, distinct method calls as opposed to creating numerous clients from a shared options bag - at least with
    client-specific options.
 
-4. [client_new_method_params_context]
+1. [client_new_method_params_context]
 
    Similar to [client_new_method_params] but requires a `&Context` parameter declared first in the list of parameters.
    This is similar to Go and can be used for OpenTelemetry tracing, but is not used for canceling a `Future` - part of
@@ -120,7 +149,7 @@ Find all examples under the [`sdk/`](sdk/) directory. The following are what we 
    While having it as a required parameter does significantly improve discoverability, it still does not guarantee that a container
    wrapping our APIs will expose it to their callers.
 
-5. [client_new_method_params_struct]
+1. [client_new_method_params_struct]
 
    Similar to [client_new_method_params] but all parameters, body, and client method options are defined by a struct.
    If any parameters are required e.g., URL path or query string parameters, this struct could only be created by a
@@ -152,6 +181,7 @@ Find all examples under the [`sdk/`](sdk/) directory. The following are what we 
     method like `set_string(name: &str, value: &str)` we feels makes this client library unwieldy.
 
 [client_builder_method_builder]: sdk/client_builder_method_builder/examples/set_secret_client_builder.rs
+[client_method_options_builder]: sdk/client_method_options_builder/examples/set_secret_options_builder.rs
 [client_new_method_builder]: sdk/client_new_method_builder/examples/set_secret_method_builder.rs
 [client_new_method_params]: sdk/client_new_method_params/examples/set_secret_params.rs
 [client_new_method_params_context]: sdk/client_new_method_params_context/examples/set_secret_params_context.rs
