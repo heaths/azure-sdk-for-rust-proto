@@ -9,179 +9,179 @@ Nothing herein should be interpreted as a matter of policy.
 
 Find all examples under the [`sdk/`](sdk/) directory. The following are what we are focusing on currently:
 
-1. [client_new_method_params]
+### [client_new_method_params]
 
-   Construct clients with `new(...)` and call methods with required parameters and optional call parameters including policy customizations.
+Construct clients with `new(...)` and call methods with required parameters and optional call parameters including policy customizations.
 
-   Clients are immutable so long as the client options are cloned or copied.
+Clients are immutable so long as the client options are cloned or copied.
 
-   **Pros**
+**Pros**
 
-   * Similar feel to most other languages.
-   * Can share options across multiple, distinct client method calls.
+* Similar feel to most other languages.
+* Can share options across multiple, distinct client method calls.
 
-   **Cons**
+**Cons**
 
-   * Either callers or the callee must allocate, or we use a single lazy allocation of the `Default` implementation.
-   * Callers may set ambiguous or conflicting options.
+* Either callers or the callee must allocate, or we use a single lazy allocation of the `Default` implementation.
+* Callers may set ambiguous or conflicting options.
 
-   **Decision**
+**Decision**
 
-   We'll proceed with guidelines using this pattern. For some clients like `BlobClient` this is important,
-   but we should strive to actually share options and not clone or copy them or this will be of little value over builders.
+We'll proceed with guidelines using this pattern. For some clients like `BlobClient` this is important,
+but we should strive to actually share options and not clone or copy them or this will be of little value over builders.
 
-   Options structs should derive or implement `Default` to make them future-proof barring breaking changes like adding required fields.
+Options structs should derive or implement `Default` to make them future-proof barring breaking changes like adding required fields.
 
-1. [client_method_options_builder]
+### [client_method_options_builder]
 
-   This combines [client_new_method_params] and [client_builder_method_builder] to provide better discoverability (with a caveat)
-   and ease of use e.g., passing in a `&str` instead of `"a string".to_string()` and option bag reuse.
-   Methods take parameters as in [client_new_method_params] and only the options have a builder similar to [client_builder_method_builder].
+This combines [client_new_method_params] and [client_builder_method_builder] to provide better discoverability (with a caveat)
+and ease of use e.g., passing in a `&str` instead of `"a string".to_string()` and option bag reuse.
+Methods take parameters as in [client_new_method_params] and only the options have a builder similar to [client_builder_method_builder].
 
-   **Pros**
+**Pros**
 
-   * Similar feel to most other languages.
-   * Can share options across multiple, distinct client method calls.
-   * Can mitigate ambiguous or conflicting options using a [typestate builder pattern].
-   * Can validate options beyond type safety since setters are used.
+* Similar feel to most other languages.
+* Can share options across multiple, distinct client method calls.
+* Can mitigate ambiguous or conflicting options using a [typestate builder pattern].
+* Can validate options beyond type safety since setters are used.
 
-   **Cons**
+**Cons**
 
-   * The noted caveat is that `azure_core::ClientOptionsBuilder` or `azure_core::ClientMethodOptionsBuilder` traits have to be
-     imported to see their methods, so that hurts discoverability. rust-analyzer does recommend this, but even in Visual Studio Code
-     you can't simply `Ctrl+.` to have rust-analyzer do it for you like in many similar cases. Once it's imported, though,
-     discoverability is improved. If someone added `use azure_core::*` they would be imported.
+* The noted caveat is that `azure_core::ClientOptionsBuilder` or `azure_core::ClientMethodOptionsBuilder` traits have to be
+ imported to see their methods, so that hurts discoverability. rust-analyzer does recommend this, but even in Visual Studio Code
+ you can't simply `Ctrl+.` to have rust-analyzer do it for you like in many similar cases. Once it's imported, though,
+ discoverability is improved. If someone added `use azure_core::*` they would be imported.
 
-     > TODO: Is there some way we can "bootstrap" the import?
-     >
-     > Perhaps we could use a macro instead: pass it whatever the client options or client method options field is named,
-     > and the macro from `azure_core` will declare all getters and setters directly on the client- or call-specific options.
+ > TODO: Is there some way we can "bootstrap" the import?
+ >
+ > Perhaps we could use a macro instead: pass it whatever the client options or client method options field is named,
+ > and the macro from `azure_core` will declare all getters and setters directly on the client- or call-specific options.
 
-   * If we take an `Option<SetClientOptions>` or `Option<SetSecretOptions>`, we still likely end up allocating a `Default` implementation
-     unless we use a lazy allocation.
+* If we take an `Option<SetClientOptions>` or `Option<SetSecretOptions>`, we still likely end up allocating a `Default` implementation
+ unless we use a lazy allocation.
 
-   **Decision**
+**Decision**
 
-   > TODO: Not yet discussed.
+> TODO: Not yet discussed.
 
-1. [client_builder_method_builder]
+### [client_builder_method_builder]
 
-   Builders are fairly common in Rust, used in the likes of the AWS SDK (only for method calls), Bevy (ECS game engine),
-   and some others. I wouldn't go so far as saying they are idiomatic, though: many projects even for cloud-related crates
-   don't use them. But they do help validate or constrain inputs and can even be used with the
-   [typestate builder pattern](https://gist.github.com/heaths/1eb608df947de5d5b47da0ee6a5a5c6d) to enforce
-   mutually-exclusive settings or required groups of settings in ways that setting public fields or calling field setters
-   cannot do.
+Builders are fairly common in Rust, used in the likes of the AWS SDK (only for method calls), Bevy (ECS game engine),
+and some others. I wouldn't go so far as saying they are idiomatic, though: many projects even for cloud-related crates
+don't use them. But they do help validate or constrain inputs and can even be used with the
+[typestate builder pattern](https://gist.github.com/heaths/1eb608df947de5d5b47da0ee6a5a5c6d) to enforce
+mutually-exclusive settings or required groups of settings in ways that setting public fields or calling field setters
+cannot do.
 
-   This prototype uses builders for both client - and, more notably, client options - as well as service method calls.
+This prototype uses builders for both client - and, more notably, client options - as well as service method calls.
 
-   Client builders as prototyped are mutable, but clients created from `build(&self) -> Client` are immutable.
-   Client method builders are also mutable until `send(&self) -> BoxFuture<Result<Response>>` is called.
+Client builders as prototyped are mutable, but clients created from `build(&self) -> Client` are immutable.
+Client method builders are also mutable until `send(&self) -> BoxFuture<Result<Response>>` is called.
 
-   **Pros**
+**Pros**
 
-   * If using builders at all, this is consistently using them for client creation and client method calls.
-   * Can lead callers down the path of success using the [typestate builder pattern] when necessary.
-   * Can validate options beyond type safety since setters are used.
-   * Consistent with some other larger frameworks like `bevy`.
+* If using builders at all, this is consistently using them for client creation and client method calls.
+* Can lead callers down the path of success using the [typestate builder pattern] when necessary.
+* Can validate options beyond type safety since setters are used.
+* Consistent with some other larger frameworks like `bevy`.
 
-   **Cons**
+**Cons**
 
-   * Method builders do not support sharing common options across multiple, distinct client method calls.
+* Method builders do not support sharing common options across multiple, distinct client method calls.
 
-   **Decision**
+**Decision**
 
-   There are a lot of advantages to discoverability and future-proofing, but sharing options across multiple, distinct method calls
-   is difficult. Even if we could solve sharing a subset of options - which I believe we could - it would most likely
-   introduce lifetime constraints that would likely make the API unwieldy to callers.
+There are a lot of advantages to discoverability and future-proofing, but sharing options across multiple, distinct method calls
+is difficult. Even if we could solve sharing a subset of options - which I believe we could - it would most likely
+introduce lifetime constraints that would likely make the API unwieldy to callers.
 
-   Even if we do not end up using builders for client construction and method calls, there may still be limited use cases
-   for which the [typestate builder pattern] is well-suited like for constructing SAS URLs.
+Even if we do not end up using builders for client construction and method calls, there may still be limited use cases
+for which the [typestate builder pattern] is well-suited like for constructing SAS URLs.
 
-1. [client_new_method_builder]
+### [client_new_method_builder]
 
-   A combination of [client_new_method_params] to construct clients using `new(...)` and [client_builder_method_builder]
-   using a builder for methods to optionally configure per-call settings.
+A combination of [client_new_method_params] to construct clients using `new(...)` and [client_builder_method_builder]
+using a builder for methods to optionally configure per-call settings.
 
-   This is similar to how the [AWS SDK](https://awslabs.github.io/aws-sdk-rust/) is defined.
+This is similar to how the [AWS SDK](https://awslabs.github.io/aws-sdk-rust/) is defined.
 
-   Clients are immutable so long as the client options are cloned or copied.
-   Client method builds are mutable until `send(&self) -> BoxFuture<Result<Response>>` is called.
+Clients are immutable so long as the client options are cloned or copied.
+Client method builds are mutable until `send(&self) -> BoxFuture<Result<Response>>` is called.
 
-   Similar pros and cons to [client_builder_method_builder], but:
+Similar pros and cons to [client_builder_method_builder], but:
 
-   **Pros**
+**Pros**
 
-   * Consistent with the AWS SDKs, so familiar call patterns may ease migration to Azure.
+* Consistent with the AWS SDKs, so familiar call patterns may ease migration to Azure.
 
-   **Cons**
+**Cons**
 
-   * Inconsistent - perhaps even jarring - to use a client "constructor" but builders for client methods.
+* Inconsistent - perhaps even jarring - to use a client "constructor" but builders for client methods.
 
-   **Decision**
+**Decision**
 
-   If we're going to use builders we should be consistent. If anything, it's more likely callers would want to share options
-   across multiple, distinct method calls as opposed to creating numerous clients from a shared options bag - at least with
-   client-specific options.
+If we're going to use builders we should be consistent. If anything, it's more likely callers would want to share options
+across multiple, distinct method calls as opposed to creating numerous clients from a shared options bag - at least with
+client-specific options.
 
-1. [client_new_method_params_context]
+### [client_new_method_params_context]
 
-   Similar to [client_new_method_params] but requires a `&Context` parameter declared first in the list of parameters.
-   This is similar to Go and can be used for OpenTelemetry tracing, but is not used for canceling a `Future` - part of
-   Rust's async framework. To cancel a `Future` you merely need to `drop()` it. Currently, this `Context` might only be
-   a property bag.
+Similar to [client_new_method_params] but requires a `&Context` parameter declared first in the list of parameters.
+This is similar to Go and can be used for OpenTelemetry tracing, but is not used for canceling a `Future` - part of
+Rust's async framework. To cancel a `Future` you merely need to `drop()` it. Currently, this `Context` might only be
+a property bag.
 
-   Clients are immutable so long as the client options are cloned or copied.
+Clients are immutable so long as the client options are cloned or copied.
 
-   Similar pros and cons to [client_new_method_params], but:
+Similar pros and cons to [client_new_method_params], but:
 
-   **Pros**
+**Pros**
 
-   * For those callers who want to add context or who may expose context to their own callers when wrapping our APIs,
-     this may be more obvious that something should be passed.
+* For those callers who want to add context or who may expose context to their own callers when wrapping our APIs,
+ this may be more obvious that something should be passed.
 
-   **Cons**
+**Cons**
 
-   * Most callers will end up passing `Context::default` (by value or reference) for the first param, which is not common.
-     Even passing as an `Option<Context>` means most customers will pass `None`, and having to pass multiple `None`s is uncommon.
-     Comparing to other languages besides Go where `context.Context` is already idiomatic, few callers pass optional context.
+* Most callers will end up passing `Context::default` (by value or reference) for the first param, which is not common.
+ Even passing as an `Option<Context>` means most customers will pass `None`, and having to pass multiple `None`s is uncommon.
+ Comparing to other languages besides Go where `context.Context` is already idiomatic, few callers pass optional context.
 
-   **Decision**
+**Decision**
 
-   Requiring an argument that the majority of callers will either pass `None` or `Context::default()` is not common.
-   While having it as a required parameter does significantly improve discoverability, it still does not guarantee that a container
-   wrapping our APIs will expose it to their callers.
+Requiring an argument that the majority of callers will either pass `None` or `Context::default()` is not common.
+While having it as a required parameter does significantly improve discoverability, it still does not guarantee that a container
+wrapping our APIs will expose it to their callers.
 
-1. [client_new_method_params_struct]
+### [client_new_method_params_struct]
 
-   Similar to [client_new_method_params] but all parameters, body, and client method options are defined by a struct.
-   If any parameters are required e.g., URL path or query string parameters, this struct could only be created by a
-   `new(...)` method. If every field is optional, it could derive or implement `Default`.
+Similar to [client_new_method_params] but all parameters, body, and client method options are defined by a struct.
+If any parameters are required e.g., URL path or query string parameters, this struct could only be created by a
+`new(...)` method. If every field is optional, it could derive or implement `Default`.
 
-   **Pros**
+**Pros**
 
-   * All "parameters" are named, which makes reviewing code and debugging with symbols subjectively easier.
-   * Can be serialized, though a separate struct will be needed if you want to serialize fields that are not part of the
-     request body.
+* All "parameters" are named, which makes reviewing code and debugging with symbols subjectively easier.
+* Can be serialized, though a separate struct will be needed if you want to serialize fields that are not part of the
+ request body.
 
-   **Cons**
+**Cons**
 
-   * You likely need separate structs for the body and parameters because callers may need to serialize URL parameters.
-     This means cloning or copying memory, or taking references that may require defining lifetime parameters which
-     may complicate the API for callers.
+* You likely need separate structs for the body and parameters because callers may need to serialize URL parameters.
+ This means cloning or copying memory, or taking references that may require defining lifetime parameters which
+ may complicate the API for callers.
 
-     For a data plane client library, after some internal discussion we also don't see a value in this like there may
-     be for control plane (ARM).
+ For a data plane client library, after some internal discussion we also don't see a value in this like there may
+ be for control plane (ARM).
 
-    **Decision**
+**Decision**
 
-    While this may improve code reviews and possibility debugging, we can think of no strong reason to necessarily supporting
-    deserialization of client library parameters. Request and response models should, no doubt, but required method parameters
-    that typically correspond to required URL path or query string parameters it not something customers of our other
-    Azure SDK languages have ever asked for nor have we seen use cases to warrant feature work.
+While this may improve code reviews and possibility debugging, we can think of no strong reason to necessarily supporting
+deserialization of client library parameters. Request and response models should, no doubt, but required method parameters
+that typically correspond to required URL path or query string parameters it not something customers of our other
+Azure SDK languages have ever asked for nor have we seen use cases to warrant feature work.
 
-    Add to that, deciding what should or shouldn't be serializable and that customers have to create a struct just to call a simple
-    method like `set_string(name: &str, value: &str)` we feels makes this client library unwieldy.
+Add to that, deciding what should or shouldn't be serializable and that customers have to create a struct just to call a simple
+method like `set_string(name: &str, value: &str)` we feels makes this client library unwieldy.
 
 [client_builder_method_builder]: sdk/client_builder_method_builder/examples/set_secret_client_builder.rs
 [client_method_options_builder]: sdk/client_method_options_builder/examples/set_secret_options_builder.rs
