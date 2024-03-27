@@ -1,7 +1,4 @@
-use azure_core::{
-    ClientMethodOptionsBuilder as _, ClientOptionsBuilder as _, Context, ExponentialRetryOptions,
-    RetryOptions,
-};
+use azure_core::{ClientMethodOptionsBuilder as _, Context, ExponentialRetryOptions, RetryOptions};
 use azure_identity::DefaultAzureCredential;
 use client_method_options_builder::{
     Secret, SecretClient, SecretClientOptions, SecretProperties, SetSecretOptions,
@@ -15,7 +12,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let credential = Arc::new(DefaultAzureCredential::default());
     let options = SecretClientOptions::builder()
         .with_api_version("7.4")
-        // BUGBUG: Not initially discoverable; rust-analyzer tells you want to import, but not immediately discoverable.
         .with_retry(RetryOptions::exponential(ExponentialRetryOptions {}))
         .build();
     let client = SecretClient::new(endpoint, credential, Some(options))?;
