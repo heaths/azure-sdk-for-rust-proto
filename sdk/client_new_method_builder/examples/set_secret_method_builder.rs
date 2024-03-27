@@ -47,22 +47,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     ctx.insert("example".to_string());
 
     let (_, _) = tokio::join!(
-        async {
-            client
-                .set_secret("foo", "foo-value")
-                .with_content_type("text/plain")
-                .with_context(ctx.clone())
-                .send()
-                .await
-        },
-        async {
-            client
-                .set_secret("bar", "bar-value")
-                .with_content_type("text/plain")
-                .with_context(ctx.clone())
-                .send()
-                .await
-        },
+        client
+            .set_secret("foo", "foo-value")
+            .with_content_type("text/plain")
+            .with_context(ctx.clone())
+            .send(),
+        client
+            .set_secret("bar", "bar-value")
+            .with_content_type("text/plain")
+            .with_context(ctx.clone())
+            .send()
+        ,
     );
 
     Ok(())
