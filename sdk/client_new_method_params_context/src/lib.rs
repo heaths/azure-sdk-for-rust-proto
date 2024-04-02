@@ -53,16 +53,16 @@ impl SecretClient {
     #[allow(unused_variables)]
     pub async fn set_secret<N, V>(
         &self,
-        ctx: &Context,
         name: N,
         value: V,
         options: Option<SetSecretOptions>,
+        ctx: Option<&Context>,
     ) -> azure_core::Result<Response>
     where
         N: Into<String>,
         V: Into<String>,
     {
-        let mut ctx = Context::with_context(ctx);
+        let mut ctx = ctx.map_or_else(Context::default, Context::with_context);
         ctx.insert(Span::from("SecretClient::set_secret"));
 
         let mut url = self.endpoint.clone();
