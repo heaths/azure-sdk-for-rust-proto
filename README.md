@@ -9,6 +9,33 @@ Nothing herein should be interpreted as a matter of policy.
 
 Find all examples under the [`sdk/`](sdk/) directory. The following are what we are focusing on currently:
 
+### [client_new_method_params_context]
+
+Similar to [client_new_method_params] but accepts a separate, optional `&Context` parameter declared last in the list of parameters.
+This is similar to Go and can be used for OpenTelemetry tracing, but is not used for canceling a `Future` - part of
+Rust's async framework. To cancel a `Future` you merely need to `drop()` it. Currently, this `Context` might only be
+a property bag.
+
+This separates the `Context` from client method options, such that the options are considered service method options e.g.,
+optional parameters, from client method options e.g., tracing, retry options, etc.
+
+Similar pros and cons to [client_new_method_params], but:
+
+**Pros**
+
+* For those callers who want to add context or who may expose context to their own callers when wrapping our APIs,
+ this may be more obvious that something should be passed.
+
+**Cons**
+
+* Most callers are likely to pass `None` for both service method options and client method options, leading to a lot of `Nones`
+  in the default case.
+
+**Decision**
+
+Though originally this prototype put a required `&Context` first in the parameter list exactly like in Go, this updated
+prototype puts it last and is more palatable to the few we've talked to internally so far.
+
 ### [client_new_method_params]
 
 Construct clients with `new(...)` and call methods with required parameters and optional call parameters including policy customizations.
@@ -123,34 +150,6 @@ Similar pros and cons to [client_builder_method_builder], but:
 If we're going to use builders we should be consistent. If anything, it's more likely callers would want to share options
 across multiple, distinct method calls as opposed to creating numerous clients from a shared options bag - at least with
 client-specific options.
-
-### [client_new_method_params_context]
-
-Similar to [client_new_method_params] but requires a `&Context` parameter declared first in the list of parameters.
-This is similar to Go and can be used for OpenTelemetry tracing, but is not used for canceling a `Future` - part of
-Rust's async framework. To cancel a `Future` you merely need to `drop()` it. Currently, this `Context` might only be
-a property bag.
-
-Clients are immutable so long as the client options are cloned or copied.
-
-Similar pros and cons to [client_new_method_params], but:
-
-**Pros**
-
-* For those callers who want to add context or who may expose context to their own callers when wrapping our APIs,
- this may be more obvious that something should be passed.
-
-**Cons**
-
-* Most callers will end up passing `Context::default` (by value or reference) for the first param, which is not common.
- Even passing as an `Option<Context>` means most customers will pass `None`, and having to pass multiple `None`s is uncommon.
- Comparing to other languages besides Go where `context.Context` is already idiomatic, few callers pass optional context.
-
-**Decision**
-
-Requiring an argument that the majority of callers will either pass `None` or `Context::default()` is not common.
-While having it as a required parameter does significantly improve discoverability, it still does not guarantee that a container
-wrapping our APIs will expose it to their callers.
 
 ### [client_new_method_params_struct]
 

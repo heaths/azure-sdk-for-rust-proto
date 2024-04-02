@@ -21,7 +21,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Simple client method call.
     let response = client
-        .set_secret(&Context::default(), "secret-name", "secret-value", None)
+        .set_secret("secret-name", "secret-value", None, None)
         .await?;
 
     let secret: Secret = response.json().await?;
@@ -33,13 +33,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let response = client
         .set_secret(
-            &ctx,
             "secret-name",
             "rotated-value",
             Some(SetSecretOptions {
                 properties: Some(SecretProperties { enabled: false }),
                 ..Default::default()
             }),
+            Some(&ctx),
         )
         .await?;
 
@@ -58,8 +58,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     };
 
     let (_, _) = tokio::join!(
-        client.set_secret(&ctx, "foo", "foo-value", Some(options.clone())),
-        client.set_secret(&ctx, "bar", "bar-value", Some(options.clone())),
+        client.set_secret("foo", "foo-value", Some(options.clone()), Some(&ctx)),
+        client.set_secret("bar", "bar-value", Some(options.clone()), Some(&ctx)),
     );
 
     Ok(())
