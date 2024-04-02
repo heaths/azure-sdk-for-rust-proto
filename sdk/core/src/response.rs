@@ -4,7 +4,8 @@ use futures::{Stream, StreamExt};
 use serde::de::DeserializeOwned;
 use std::pin::Pin;
 
-pub(crate) type PinnedStream = Pin<Box<dyn Stream<Item = crate::Result<Bytes>> + Send + Sync>>;
+// TODO: Should be pub(crate) in actual implementation.
+pub type PinnedStream = Pin<Box<dyn Stream<Item = crate::Result<Bytes>> + Send + Sync>>;
 
 pub struct Response {
     status: u16,

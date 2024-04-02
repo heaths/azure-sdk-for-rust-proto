@@ -1,12 +1,14 @@
 #![doc = include_str!("../README.md")]
 
 mod models;
+mod response;
 
 use azure_core::{
     policies::{ApiKeyAuthenticationPolicy, Policy},
-    ClientOptions, Context, Pipeline, Request, Response, Result, Span, TokenCredential, Url,
+    ClientOptions, Context, Pipeline, Request, Result, Span, TokenCredential, Url,
 };
 pub use models::*;
+pub use response::*;
 use std::{collections::HashMap, sync::Arc};
 
 #[derive(Debug, Clone)]
@@ -57,7 +59,7 @@ impl SecretClient {
         value: V,
         options: Option<SetSecretOptions>,
         ctx: Option<&Context>,
-    ) -> azure_core::Result<Response>
+    ) -> azure_core::Result<Response<Secret>>
     where
         N: Into<String>,
         V: Into<String>,
@@ -75,7 +77,10 @@ impl SecretClient {
             ..Default::default()
         })?;
 
-        self.pipeline.send(&mut ctx, &mut request).await
+        self.pipeline
+            .send(&mut ctx, &mut request)
+            .await
+            .map(Into::<Response<Secret>>::into)
     }
 }
 

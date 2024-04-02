@@ -1,3 +1,5 @@
+use crate::response::Response;
+use futures::executor::block_on;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -7,6 +9,15 @@ pub struct Secret {
     pub version: String,
     #[serde(rename = "attributes")]
     pub properties: SecretProperties,
+}
+
+impl TryFrom<Response<Secret>> for Secret {
+    type Error = azure_core::Error;
+
+    fn try_from(value: Response<Secret>) -> Result<Self, Self::Error> {
+        let f = || value.into_body().json::<Secret>();
+        block_on(f())
+    }
 }
 
 #[derive(Clone, Debug, Default, Serialize)]

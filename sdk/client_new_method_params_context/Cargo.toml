@@ -6,6 +6,7 @@ publish = false
 
 [dependencies]
 azure_core = { workspace = true, features = ["context"] }
+futures = { workspace = true }
 serde = { workspace = true }
 
 [dev-dependencies]

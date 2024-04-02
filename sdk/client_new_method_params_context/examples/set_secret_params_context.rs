@@ -20,11 +20,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = SecretClient::new(endpoint, credential, Some(options))?;
 
     // Simple client method call.
-    let response = client
+    let secret: Secret = client
         .set_secret("secret-name", "secret-value", None, None)
-        .await?;
-
-    let secret: Secret = response.json().await?;
+        .await?
+        .try_into()?;
     println!("set {} version {}", secret.name, secret.version);
 
     // More complex client method call.
@@ -44,8 +43,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     // Option 2: Implement async TryFrom<Response> for models, which customers can also do. Options are not mutually exclusive.
-    // Note: async TryFrom<T> is still experimental but under consideration.
-    let secret: Secret = response.json().await?;
+    // NOTE: async TryFrom<T> is still experimental but under consideration.
+    let secret: Secret = response.try_into()?;
     println!("set {} version {}", secret.name, secret.version);
 
     // Concurrent client method calls with same options.
