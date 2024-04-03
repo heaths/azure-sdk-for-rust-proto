@@ -1,3 +1,4 @@
+use azure_core::{CollectedResponse, RawResponse};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -7,6 +8,15 @@ pub struct Secret {
     pub version: String,
     #[serde(rename = "attributes")]
     pub properties: SecretProperties,
+
+    #[serde(skip)]
+    pub(crate) _raw_response: Option<CollectedResponse>,
+}
+
+impl RawResponse for Secret {
+    fn raw_response(self) -> Option<CollectedResponse> {
+        self._raw_response
+    }
 }
 
 #[derive(Clone, Debug, Default, Serialize)]

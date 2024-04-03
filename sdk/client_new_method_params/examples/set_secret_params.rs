@@ -1,7 +1,9 @@
 use azure_client_new_methods_params::{
-    Secret, SecretClient, SecretClientOptions, SecretProperties, SetSecretOptions,
+    SecretClient, SecretClientOptions, SecretProperties, SetSecretOptions,
 };
-use azure_core::{ClientOptions, Context, ExponentialRetryOptions, RetryOptions};
+use azure_core::{
+    ClientOptions, Context, ExponentialRetryOptions, RawResponse as _, RetryOptions, REQUEST_ID,
+};
 use azure_identity::DefaultAzureCredential;
 use std::{env, sync::Arc};
 
@@ -20,18 +22,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = SecretClient::new(endpoint, credential, Some(options))?;
 
     // Simple client method call.
-    let response = client
+    let secret = client
         .set_secret("secret-name", "secret-value", None)
         .await?;
 
-    let secret: Secret = response.json().await?;
     println!("set {} version {}", secret.name, secret.version);
 
     // More complex client method call.
     let mut ctx = Context::default();
     ctx.insert("example".to_string());
 
-    let response = client
+    let secret = client
         .set_secret(
             "secret-name",
             "rotated-value",
@@ -42,11 +43,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }),
         )
         .await?;
-
-    // Option 2: Implement async TryFrom<Response> for models, which customers can also do. Options are not mutually exclusive.
-    // Note: async TryFrom<T> is still experimental but under consideration.
-    let secret: Secret = response.json().await?;
     println!("set {} version {}", secret.name, secret.version);
+
+    // Get the x-ms-request-id from the raw response headers.
+    if let Some(response) = secret.raw_response() {
+        if let Some(request_id) = response.headers().get_optional_str(&REQUEST_ID) {
+            println!("x-ms-request-id: {request_id}");
+        }
+    }
 
     // Concurrent client method calls with same options.
     let mut ctx = Context::default();

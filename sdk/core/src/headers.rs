@@ -246,6 +246,7 @@ pub const IF_MATCH: HeaderName = HeaderName::from_static("if-match");
 pub const IF_MODIFIED_SINCE: HeaderName = HeaderName::from_static("if-modified-since");
 pub const IF_NONE_MATCH: HeaderName = HeaderName::from_static("if-none-match");
 pub const IF_UNMODIFIED_SINCE: HeaderName = HeaderName::from_static("if-unmodified-since");
+pub const REQUEST_ID: HeaderName = HeaderName::from_static("x-ms-request-id");
 pub const TAGS: HeaderName = HeaderName::from_static("x-ms-tags");
 pub const USER_AGENT: HeaderName = HeaderName::from_static("user-agent");
 pub const WWW_AUTHENTICATE: HeaderName = HeaderName::from_static("www-authenticate");

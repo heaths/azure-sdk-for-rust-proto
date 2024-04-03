@@ -4,7 +4,8 @@ mod models;
 
 use azure_core::{
     policies::{ApiKeyAuthenticationPolicy, Policy},
-    ClientOptions, Context, Pipeline, Request, Response, Result, Span, TokenCredential, Url,
+    ClientOptions, CollectedResponse, Context, Pipeline, Request, Result, Span, TokenCredential,
+    Url,
 };
 pub use models::*;
 use std::{collections::HashMap, sync::Arc};
@@ -56,7 +57,7 @@ impl SecretClient {
         name: N,
         value: V,
         options: Option<SetSecretOptions>,
-    ) -> azure_core::Result<Response>
+    ) -> azure_core::Result<Secret>
     where
         N: Into<String>,
         V: Into<String>,
@@ -76,7 +77,11 @@ impl SecretClient {
             ..Default::default()
         })?;
 
-        self.pipeline.send(&mut ctx, &mut request).await
+        let response = self.pipeline.send(&mut ctx, &mut request).await?;
+        let response = CollectedResponse::from_response(response).await?;
+        let mut secret: Secret = response.json()?;
+        secret._raw_response = Some(response);
+        Ok(secret)
     }
 }
 
