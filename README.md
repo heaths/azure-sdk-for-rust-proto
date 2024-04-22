@@ -19,6 +19,9 @@ a property bag.
 This separates the `Context` from client method options, such that the options are considered service method options e.g.,
 optional parameters, from client method options e.g., tracing, retry options, etc.
 
+This example also shows a proposal of a client method returning a `Result<Response<T>>` that allows you to get a response
+and decide later to deserialize
+
 Similar pros and cons to [client_new_method_params], but:
 
 **Pros**
@@ -41,6 +44,10 @@ prototype puts it last and is more palatable to the few we've talked to internal
 Construct clients with `new(...)` and call methods with required parameters and optional call parameters including policy customizations.
 
 Clients are immutable so long as the client options are cloned or copied.
+
+This example also shows a proposal of a client method returning a deserialized model with an embedded raw response as a `Result<T>`.
+The drawback with this proposal is that the caller must always collect the entire stream even if they just want the raw response e.g.,
+to deserialize into their own models.
 
 **Pros**
 
