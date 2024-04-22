@@ -39,6 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             Some(SetSecretOptions {
                 context: Some(ctx),
                 properties: Some(SecretProperties { enabled: false }),
+                if_none_match: secret.etag,
                 ..Default::default()
             }),
         )

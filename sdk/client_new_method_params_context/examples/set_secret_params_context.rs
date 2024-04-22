@@ -36,6 +36,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "rotated-value",
             Some(SetSecretOptions {
                 properties: Some(SecretProperties { enabled: false }),
+                if_none_match: secret.etag,
                 ..Default::default()
             }),
             Some(&ctx),
