@@ -4,6 +4,7 @@ use std::collections::HashMap;
 
 #[derive(Clone, Debug, Deserialize)]
 pub struct Secret {
+    // Allocated memory.
     pub name: String,
     pub version: String,
     #[serde(rename = "attributes")]
@@ -11,6 +12,7 @@ pub struct Secret {
     #[serde(skip)]
     pub etag: Option<Etag>,
 
+    // Allocated memory essentially duplicated above.
     #[serde(skip)]
     pub(crate) _raw_response: Option<CollectedResponse>,
 }

@@ -3,6 +3,8 @@ use std::{
     fmt::{Debug, Display},
 };
 
+use crate::CollectedResponse;
+
 pub type Result<T> = std::result::Result<T, Error>;
 
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -10,6 +12,7 @@ pub enum ErrorKind {
     HttpResponse {
         status: u16,
         error_code: Option<String>,
+        raw_response: Option<CollectedResponse>,
     },
     Io,
     DataConversion,
@@ -28,7 +31,9 @@ impl ErrorKind {
 impl Display for ErrorKind {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            ErrorKind::HttpResponse { status, error_code } => {
+            ErrorKind::HttpResponse {
+                status, error_code, ..
+            } => {
                 write!(
                     f,
                     "HttpResponse({}, {})",

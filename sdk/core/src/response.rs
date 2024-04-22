@@ -2,7 +2,7 @@ use crate::headers::Headers;
 use bytes::Bytes;
 use futures::{Stream, StreamExt};
 use serde::de::DeserializeOwned;
-use std::pin::Pin;
+use std::{fmt, pin::Pin};
 
 // TODO: Should be pub(crate) in actual implementation.
 pub type PinnedStream = Pin<Box<dyn Stream<Item = crate::Result<Bytes>> + Send + Sync>>;
@@ -46,8 +46,8 @@ impl Response {
     }
 }
 
-impl std::fmt::Debug for Response {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+impl fmt::Debug for Response {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("Response")
             .field("status", &self.status)
             .field("headers", &self.headers)
@@ -82,7 +82,7 @@ impl ResponseBody {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct CollectedResponse {
     status: u16,
     headers: Headers,
@@ -92,6 +92,19 @@ pub struct CollectedResponse {
 impl AsRef<[u8]> for CollectedResponse {
     fn as_ref(&self) -> &[u8] {
         self.body.as_ref()
+    }
+}
+
+impl fmt::Debug for CollectedResponse {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("CollectedResponse")
+            .field("status", &self.status)
+            .field("headers", &self.headers)
+            .field(
+                "body",
+                &String::from_utf8(self.body.to_vec()).unwrap_or_else(|_| String::from("(binary)")),
+            )
+            .finish()
     }
 }
 

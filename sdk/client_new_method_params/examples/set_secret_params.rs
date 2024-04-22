@@ -1,8 +1,9 @@
 use azure_client_new_methods_params::{
-    SecretClient, SecretClientOptions, SecretProperties, SetSecretOptions,
+    Secret, SecretClient, SecretClientOptions, SecretProperties, SetSecretOptions,
 };
 use azure_core::{
-    ClientOptions, Context, ExponentialRetryOptions, RawResponse as _, RetryOptions, REQUEST_ID,
+    ClientOptions, Context, ErrorKind, ExponentialRetryOptions, RawResponse as _, RetryOptions,
+    REQUEST_ID,
 };
 use azure_identity::DefaultAzureCredential;
 use std::{env, sync::Arc};
@@ -24,9 +25,21 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Simple client method call.
     let secret = client
         .set_secret("secret-name", "secret-value", None)
-        .await?;
+        .await?; // Completes network call and deserializes, or fails.
 
     println!("set {} version {}", secret.name, secret.version);
+
+    // Alternatively without the syntactic sugar above:
+    let name = "secret-name";
+    let secret: Secret = match client.set_secret(name, "secret-value", None).await {
+        Ok(resp) => resp,
+        Err(err) => {
+            if let ErrorKind::HttpResponse { raw_response, .. } = err.kind() {
+                eprintln!("failed to set secret {name}: {raw_response:?}");
+            }
+            std::process::exit(1)
+        }
+    };
 
     // More complex client method call.
     let mut ctx = Context::default();
