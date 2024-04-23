@@ -1,5 +1,5 @@
 use crate::response::Response;
-use azure_core::{Etag, ETAG};
+use azure_core::{Etag, RequestContent, ETAG};
 use futures::executor::block_on;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -40,5 +40,23 @@ pub(crate) struct SetSecretRequest {
 
 #[derive(Clone, Debug, Default, Serialize, Deserialize)]
 pub struct SecretProperties {
+    #[serde(skip)]
     pub enabled: bool,
+}
+
+impl TryFrom<SecretProperties> for RequestContent<SecretProperties> {
+    type Error = azure_core::Error;
+    fn try_from(value: SecretProperties) -> azure_core::Result<Self> {
+        Ok(RequestContent::from(serde_json::to_vec(&value)?))
+    }
+}
+
+impl TryFrom<Response<SecretProperties>> for SecretProperties {
+    type Error = azure_core::Error;
+
+    fn try_from(value: Response<SecretProperties>) -> Result<Self, Self::Error> {
+        let f = || value.into_body().json();
+        let properties = block_on(f())?;
+        Ok(properties)
+    }
 }

@@ -8,6 +8,7 @@ mod options;
 mod pipeline;
 pub mod policies;
 mod request;
+mod request_content;
 mod response;
 pub mod stream;
 mod trace;
@@ -20,6 +21,7 @@ pub use headers::*;
 pub use options::*;
 pub use pipeline::*;
 pub use request::*;
+pub use request_content::*;
 pub use response::*;
 pub use trace::*;
 

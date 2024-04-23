@@ -74,6 +74,7 @@ dependencies = [
  "azure_identity",
  "futures",
  "serde",
+ "serde_json",
  "tokio",
 ]
 

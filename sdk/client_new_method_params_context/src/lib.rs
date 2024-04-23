@@ -5,8 +5,8 @@ mod response;
 
 use azure_core::{
     policies::{ApiKeyAuthenticationPolicy, Policy},
-    ClientOptions, Context, Etag, Pipeline, Request, Result, Span, TokenCredential, Url, IF_MATCH,
-    IF_NONE_MATCH,
+    ClientOptions, Context, Etag, Pipeline, Request, RequestContent, Result, Span, TokenCredential,
+    Url, IF_MATCH, IF_NONE_MATCH,
 };
 pub use models::*;
 pub use response::*;
@@ -93,6 +93,39 @@ impl SecretClient {
             .await
             .map(Into::<Response<Secret>>::into)
     }
+
+    #[allow(unused_variables)]
+    pub async fn update_secret_properties<NAME, VERSION>(
+        &self,
+        name: NAME,
+        version: Option<VERSION>,
+        properties: impl TryInto<RequestContent<SecretProperties>, Error = azure_core::Error>,
+        options: Option<UpdateSecretPropertiesOptions>,
+        ctx: Option<&Context>,
+    ) -> azure_core::Result<Response<SecretProperties>>
+    where
+        NAME: Into<String>,
+        VERSION: Into<String>,
+    {
+        let mut ctx = ctx.map_or_else(Context::default, Context::with_context);
+        ctx.insert(Span::from("SecretClient::update_secret_properties"));
+
+        let mut url = self.endpoint.clone();
+        url.set_path(&format!(
+            "secrets/{}/{}",
+            name.into(),
+            version.map_or_else(String::new, |v| v.into())
+        ));
+
+        let mut request = Request::new(url, "PATCH");
+        let body: RequestContent<SecretProperties> = properties.try_into()?;
+        request.set_body(body);
+
+        self.pipeline
+            .send(&mut ctx, &mut request)
+            .await
+            .map(Into::<Response<SecretProperties>>::into)
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -118,3 +151,6 @@ pub struct SetSecretOptions {
     pub if_match: Option<Etag>,
     pub if_none_match: Option<Etag>,
 }
+
+#[derive(Clone, Debug, Default)]
+pub struct UpdateSecretPropertiesOptions {}
