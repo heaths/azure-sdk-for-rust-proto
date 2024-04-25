@@ -26,4 +26,5 @@ pub use response::*;
 pub use trace::*;
 
 // Re-export common types.
+pub type DateTime = chrono::DateTime<chrono::Utc>;
 pub use url::Url;

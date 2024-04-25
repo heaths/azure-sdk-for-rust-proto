@@ -1,3 +1,4 @@
+#![allow(dead_code, unused_variables)]
 #![doc = include_str!("../README.md")]
 
 mod models;
@@ -53,18 +54,13 @@ impl SecretClient {
         &self.endpoint
     }
 
-    #[allow(unused_variables)]
-    pub async fn set_secret<N, V>(
+    pub async fn set_secret(
         &self,
-        name: N,
-        value: V,
+        name: impl Into<String>,
+        value: impl Into<String>,
         options: Option<SetSecretOptions>,
         ctx: Option<&Context>,
-    ) -> azure_core::Result<Response<Secret>>
-    where
-        N: Into<String>,
-        V: Into<String>,
-    {
+    ) -> azure_core::Result<Response<Secret>> {
         let mut ctx = ctx.map_or_else(Context::default, Context::with_context);
         ctx.insert(Span::from("SecretClient::set_secret"));
 
@@ -72,16 +68,6 @@ impl SecretClient {
         url.set_path(&format!("secrets/{}", name.into()));
 
         let mut request = Request::new(url, "GET");
-        // NOTE: This is done with strong types in existing code.
-        // Shown here only as demonstration.
-        if let Some(ref options) = options {
-            if let Some(etag) = &options.if_match {
-                request.insert_header(IF_MATCH, etag.to_string());
-            }
-            if let Some(etag) = &options.if_none_match {
-                request.insert_header(IF_NONE_MATCH, etag.to_string());
-            }
-        }
         request.set_json(&SetSecretRequest {
             value: value.into(),
             properties: options.and_then(|v| v.properties),
@@ -94,19 +80,14 @@ impl SecretClient {
             .map(Into::<Response<Secret>>::into)
     }
 
-    #[allow(unused_variables)]
-    pub async fn update_secret_properties<NAME, VERSION>(
+    pub async fn update_secret_properties(
         &self,
-        name: NAME,
-        version: Option<VERSION>,
+        name: impl Into<String>,
+        version: Option<impl Into<String>>,
         properties: impl TryInto<RequestContent<SecretProperties>, Error = azure_core::Error>,
         options: Option<UpdateSecretPropertiesOptions>,
         ctx: Option<&Context>,
-    ) -> azure_core::Result<Response<SecretProperties>>
-    where
-        NAME: Into<String>,
-        VERSION: Into<String>,
-    {
+    ) -> azure_core::Result<Response<SecretProperties>> {
         let mut ctx = ctx.map_or_else(Context::default, Context::with_context);
         ctx.insert(Span::from("SecretClient::update_secret_properties"));
 
@@ -118,6 +99,16 @@ impl SecretClient {
         ));
 
         let mut request = Request::new(url, "PATCH");
+
+        if let Some(ref options) = options {
+            if let Some(etag) = &options.if_match {
+                request.insert_header(IF_MATCH, etag.to_string());
+            }
+            if let Some(etag) = &options.if_none_match {
+                request.insert_header(IF_NONE_MATCH, etag.to_string());
+            }
+        }
+
         let body: RequestContent<SecretProperties> = properties.try_into()?;
         request.set_body(body);
 
@@ -125,6 +116,30 @@ impl SecretClient {
             .send(&mut ctx, &mut request)
             .await
             .map(Into::<Response<SecretProperties>>::into)
+    }
+
+    pub async fn get_secret(
+        &self,
+        name: impl Into<String>,
+        version: Option<impl Into<String>>,
+        options: Option<GetSecretOptions>,
+        ctx: Option<&Context>,
+    ) -> azure_core::Result<Response<Secret>> {
+        let mut ctx = ctx.map_or_else(Context::default, Context::with_context);
+        ctx.insert(Span::from("SecretClient::update_secret_properties"));
+
+        let mut url = self.endpoint.clone();
+        url.set_path(&format!(
+            "secrets/{}/{}",
+            name.into(),
+            version.map_or_else(String::new, |v| v.into())
+        ));
+
+        let mut request = Request::new(url, "GET");
+        self.pipeline
+            .send(&mut ctx, &mut request)
+            .await
+            .map(Into::<Response<Secret>>::into)
     }
 }
 
@@ -148,9 +163,13 @@ pub struct SetSecretOptions {
     pub properties: Option<SecretProperties>,
     pub content_type: Option<String>,
     pub tags: Option<HashMap<String, String>>,
+}
+
+#[derive(Clone, Debug, Default)]
+pub struct UpdateSecretPropertiesOptions {
     pub if_match: Option<Etag>,
     pub if_none_match: Option<Etag>,
 }
 
 #[derive(Clone, Debug, Default)]
-pub struct UpdateSecretPropertiesOptions {}
+pub struct GetSecretOptions {}

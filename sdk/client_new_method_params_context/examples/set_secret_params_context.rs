@@ -37,6 +37,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             std::process::exit(1)
         }
     };
+    println!("set {} version {}", secret.name, secret.version);
 
     // More complex client method call.
     let mut ctx = Context::default();
@@ -48,7 +49,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             "rotated-value",
             Some(SetSecretOptions {
                 properties: Some(SecretProperties { enabled: false }),
-                if_none_match: secret.etag,
                 ..Default::default()
             }),
             Some(&ctx),
