@@ -34,7 +34,7 @@ impl FromStr for Etag {
 
 impl fmt::Display for Etag {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        write!(f, r#"{}"#, self.0)
+        write!(f, "{}", self.0)
     }
 }
 
@@ -56,7 +56,8 @@ mod tests {
 
     #[test]
     fn contains_quotes() {
+        // BUGBUG: This should actually contain quotes e.g., `"abcd1234"` or `W/"abcd1234"` for weak tags.
         let etag: Etag = "abcd1234".into();
-        assert_eq!(r#"abcd1234"#, etag.to_string());
+        assert_eq!("abcd1234", etag.to_string());
     }
 }

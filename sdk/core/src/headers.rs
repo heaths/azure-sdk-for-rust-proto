@@ -1,5 +1,9 @@
-use crate::error::{Error, ErrorKind, ResultExt};
-use std::str::FromStr;
+use crate::{
+    error::{Error, ErrorKind, ResultExt},
+    etag::Etag,
+};
+use chrono::{DateTime, Utc};
+use std::{borrow::Cow, collections::HashMap, str::FromStr};
 
 pub trait AsHeaders {
     type Iter: Iterator<Item = (HeaderName, HeaderValue)>;
@@ -241,6 +245,7 @@ pub const AUTHORIZATION: HeaderName = HeaderName::from_static("authorization");
 pub const CLIENT_REQUEST_ID: HeaderName = HeaderName::from_static("x-ms-client-request-id");
 pub const CONTENT_ENCODING: HeaderName = HeaderName::from_static("content-encoding");
 pub const CONTENT_LENGTH: HeaderName = HeaderName::from_static("content-length");
+pub const DATE: HeaderName = HeaderName::from_static("date");
 pub const ETAG: HeaderName = HeaderName::from_static("etag");
 pub const IF_MATCH: HeaderName = HeaderName::from_static("if-match");
 pub const IF_MODIFIED_SINCE: HeaderName = HeaderName::from_static("if-modified-since");
@@ -250,3 +255,90 @@ pub const REQUEST_ID: HeaderName = HeaderName::from_static("x-ms-request-id");
 pub const TAGS: HeaderName = HeaderName::from_static("x-ms-tags");
 pub const USER_AGENT: HeaderName = HeaderName::from_static("user-agent");
 pub const WWW_AUTHENTICATE: HeaderName = HeaderName::from_static("www-authenticate");
+
+/// Extension methods on [`Headers`] that get specific types for common headers.
+///
+/// Extension methods return [`Option<T>`] even if parsing fails because the response headers cannot be changed.
+/// To get the raw string value, call one of the getters on [`Headers`].
+pub trait HeadersExt {
+    fn content_length(&self) -> Option<usize>;
+    fn date(&self) -> Option<DateTime<Utc>>;
+    fn etag(&self) -> Option<Etag>;
+    fn tags(&self) -> Option<HashMap<Cow<'_, str>, Cow<'_, str>>>;
+}
+
+impl HeadersExt for Headers {
+    fn content_length(&self) -> Option<usize> {
+        self.get_optional_as(&CONTENT_LENGTH).unwrap_or_default()
+    }
+
+    fn date(&self) -> Option<DateTime<Utc>> {
+        self.get_optional_with(&DATE, |v| {
+            DateTime::parse_from_rfc2822(v.as_str()).map(|d| d.to_utc())
+        })
+        .unwrap_or_default()
+    }
+
+    fn etag(&self) -> Option<Etag> {
+        self.get_optional_as(&ETAG).unwrap_or_default()
+    }
+
+    fn tags<'a>(&'a self) -> Option<HashMap<Cow<'a, str>, Cow<'a, str>>> {
+        self.get_optional_with(
+            &TAGS,
+            |v| -> crate::Result<HashMap<Cow<'a, str>, Cow<'a, str>>> {
+                let iter = url::form_urlencoded::parse(v.as_str().as_bytes());
+                Ok(HashMap::from_iter(iter))
+            },
+        )
+        .unwrap_or_default()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use chrono::TimeZone;
+
+    #[test]
+    fn headers_ext_content_length() {
+        let mut headers = Headers::new();
+        assert_eq!(None, headers.content_length());
+
+        headers.insert(CONTENT_LENGTH, "1234");
+        assert_eq!(Some(1234), headers.content_length());
+    }
+
+    #[test]
+    fn headers_ext_date() {
+        let mut headers = Headers::new();
+        assert_eq!(None, headers.date());
+
+        headers.insert(DATE, "Thu, 25 Apr 2024 05:33:26 GMT");
+        assert_eq!(
+            Some(Utc.with_ymd_and_hms(2024, 4, 25, 5, 33, 26).unwrap()),
+            headers.date()
+        )
+    }
+
+    #[test]
+    fn headers_ext_etag() {
+        let mut headers = Headers::new();
+        assert_eq!(None, headers.etag());
+
+        headers.insert(ETAG, r#""1234""#);
+        assert_eq!(Some(r#""1234""#.parse().unwrap()), headers.etag());
+    }
+
+    #[test]
+    fn headers_ext_tags() {
+        let mut headers = Headers::new();
+        assert_eq!(None, headers.tags());
+
+        headers.insert(TAGS, r#"foo=1&bar=a+b&baz=souffl%C3%A9"#);
+        let tags = headers.tags().unwrap();
+        assert_eq!("1", tags["foo"]);
+        assert_eq!("a b", tags["bar"]);
+        assert_eq!("soufflé", tags["baz"]);
+    }
+}
