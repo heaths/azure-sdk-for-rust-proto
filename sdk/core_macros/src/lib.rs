@@ -2,7 +2,6 @@ use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, spanned::Spanned, ItemStruct};
 
-#[allow(unused_assignments)]
 #[proc_macro_derive(ClientBuilder, attributes(options))]
 pub fn client_builder_derive(item: TokenStream) -> TokenStream {
     let builder = parse_macro_input!(item as ItemStruct);
