@@ -4,6 +4,8 @@ use std::{
     sync::Arc,
 };
 
+use crate::{RetryMode, RetryOptions, Span};
+
 // TODO: If we remove len() and is_empty() - which in the Azure/azure-sdk-for-rust repo are used only in tests - we could add a parent Arc<Context> and take those everywhere else to reduce memory on Context being potentially shared across threads.
 #[derive(Clone, Debug)]
 pub struct Context {
@@ -25,6 +27,15 @@ impl Context {
         Self {
             type_map: parent.type_map.clone(),
         }
+    }
+
+    pub fn with_value<E>(self, entity: E) -> Self
+    where
+        E: Send + Sync + 'static,
+    {
+        let mut other = self;
+        other.insert(entity);
+        other
     }
 
     pub fn insert_or_replace<E>(&mut self, entity: E) -> Option<Arc<E>>
@@ -80,6 +91,26 @@ impl Default for Context {
     }
 }
 
+/// Add or update context options that affect how the client communicates to the service.
+pub trait ContextExt {
+    /// Add or update retry options.
+    fn with_retry(self, retry: RetryOptions) -> Self;
+
+    /// Add a telemetry [`Span`].
+    fn with_span(self, span: Span) -> Self;
+}
+
+impl ContextExt for Context {
+    fn with_retry(self, retry: RetryOptions) -> Self {
+        let retry: RetryMode = retry.into();
+        self.with_value(retry)
+    }
+
+    fn with_span(self, span: Span) -> Self {
+        self.with_value(span)
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -119,5 +150,14 @@ mod tests {
         assert_eq!(parent.value::<A>().expect("expected value").0, "baz");
         assert_eq!(sut.value::<A>().expect("expected value").0, "bar");
         assert_eq!(sut.value::<B>().expect("expected value").0, 1);
+    }
+
+    #[test]
+    fn with_extensions() {
+        let ctx = Context::new()
+            .with_retry(RetryOptions::none())
+            .with_span(Span::from("test"));
+        assert_eq!(ctx.value::<RetryMode>(), Some(&RetryMode::None));
+        assert_eq!(ctx.value::<Span>(), Some(&Span::from("test")));
     }
 }

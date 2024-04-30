@@ -23,8 +23,8 @@ impl RetryOptions {
     }
 }
 
-#[derive(Clone, Debug)]
-enum RetryMode {
+#[derive(Clone, Debug, PartialEq)]
+pub(crate) enum RetryMode {
     Exponential(ExponentialRetryOptions),
     Fixed(FixedRetryOptions),
     // Custom(Arc<dyn Policy>),
@@ -37,8 +37,14 @@ impl Default for RetryMode {
     }
 }
 
-#[derive(Clone, Debug, Default)]
+impl From<RetryOptions> for RetryMode {
+    fn from(options: RetryOptions) -> Self {
+        options.mode
+    }
+}
+
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct ExponentialRetryOptions {}
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct FixedRetryOptions {}
