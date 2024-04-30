@@ -1,5 +1,5 @@
 use azure_client_builder_method_builder::{Secret, SecretClient, SecretProperties};
-use azure_core::{ClientBuilder, Context, ExponentialRetryOptions, RetryOptions};
+use azure_core::{Context, ExponentialRetryOptions, RetryOptions};
 use azure_identity::DefaultAzureCredential;
 use std::{env, sync::Arc};
 

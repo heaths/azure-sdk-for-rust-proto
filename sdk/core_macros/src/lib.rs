@@ -1,3 +1,4 @@
+extern crate proc_macro;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::{parse_macro_input, spanned::Spanned, ItemStruct};
@@ -51,6 +52,23 @@ pub fn client_builder_derive(item: TokenStream) -> TokenStream {
                 &mut self.#field_name
             }
         }
+
+        impl #builder_name {
+            pub fn with_context(&mut self, context: ::azure_core::Context) -> &mut Self {
+                self.options().context = context;
+                self
+            }
+
+            pub fn with_retry(&mut self, retry: impl ::core::convert::Into<::azure_core::RetryOptions>) -> &mut Self {
+                self.options().retry = retry.into();
+                self
+            }
+
+            pub fn with_transport(&mut self, transport: impl ::core::convert::Into<::azure_core::TransportOptions>) -> &mut Self {
+                self.options().transport = transport.into();
+                self
+            }
+            }
     }
     .into()
 }
