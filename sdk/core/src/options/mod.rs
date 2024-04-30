@@ -1,8 +1,8 @@
 mod retry;
 mod transport;
 
-#[cfg(feature = "builder")]
-pub use builder::*;
+#[cfg(feature = "builders")]
+pub use builders::*;
 pub use retry::*;
 pub use transport::*;
 
@@ -45,7 +45,7 @@ impl ClientMethodOptions {
     }
 }
 
-mod builder {
+mod builders {
     use super::*;
 
     pub trait ClientBuilder {
