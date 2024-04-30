@@ -1,6 +1,7 @@
 use azure_core::{
+    client_builder,
     policies::{ApiKeyAuthenticationPolicy, Policy},
-    ClientBuilder, ClientOptions, Pipeline, Response, Result, TokenCredential, Url,
+    ClientOptions, Pipeline, Response, Result, TokenCredential, Url,
 };
 use std::sync::Arc;
 
@@ -9,13 +10,14 @@ pub use models::*;
 
 pub const DEFAULT_API_VERSION: &str = "7.5";
 
+// NOTE: Attribute macro must listed before derive macros.
+#[client_builder]
 #[derive(Clone, Debug)]
 pub struct SecretClientBuilder {
     endpoint: Url,
     credential: Arc<dyn TokenCredential>,
     api_version: Option<String>,
     scopes: Option<Vec<String>>,
-    options: ClientOptions,
 }
 
 impl SecretClientBuilder {
@@ -25,7 +27,8 @@ impl SecretClientBuilder {
             credential: credential.clone(),
             api_version: None,
             scopes: None,
-            options: ClientOptions::default(),
+            // NOTE: I don't like this devex: that they have to use a field they didn't define. May as well use a derive attribute.
+            __options: ClientOptions::default(),
         })
     }
 
@@ -55,24 +58,18 @@ impl SecretClientBuilder {
         ));
 
         let mut per_retry_policies = vec![auth_policy];
-        per_retry_policies.extend_from_slice(&self.options.per_retry_policies);
+        per_retry_policies.extend_from_slice(&self.__options.per_retry_policies);
 
         SecretClient {
             endpoint,
             pipeline: Pipeline::new(
                 option_env!("CARGO_PKG_NAME"),
                 option_env!("CARGO_PKG_VERSION"),
-                &self.options,
-                self.options.per_call_policies.clone(),
+                &self.__options,
+                self.__options.per_call_policies.clone(),
                 per_retry_policies,
             ),
         }
-    }
-}
-
-impl ClientBuilder for SecretClientBuilder {
-    fn options(&mut self) -> &mut ClientOptions {
-        &mut self.options
     }
 }
 
