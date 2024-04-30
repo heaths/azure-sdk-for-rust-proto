@@ -9,13 +9,14 @@ pub use models::*;
 
 pub const DEFAULT_API_VERSION: &str = "7.5";
 
-#[derive(Clone, Debug)]
+#[derive(ClientBuilder, Clone, Debug)]
 pub struct SecretClientBuilder {
     endpoint: Url,
     credential: Arc<dyn TokenCredential>,
     api_version: Option<String>,
     scopes: Option<Vec<String>>,
-    options: ClientOptions,
+    #[options] // Can elide if field named `options`.
+    client_options: ClientOptions,
 }
 
 impl SecretClientBuilder {
@@ -25,7 +26,7 @@ impl SecretClientBuilder {
             credential: credential.clone(),
             api_version: None,
             scopes: None,
-            options: ClientOptions::default(),
+            client_options: ClientOptions::default(),
         })
     }
 
@@ -55,24 +56,18 @@ impl SecretClientBuilder {
         ));
 
         let mut per_retry_policies = vec![auth_policy];
-        per_retry_policies.extend_from_slice(&self.options.per_retry_policies);
+        per_retry_policies.extend_from_slice(&self.client_options.per_retry_policies);
 
         SecretClient {
             endpoint,
             pipeline: Pipeline::new(
                 option_env!("CARGO_PKG_NAME"),
                 option_env!("CARGO_PKG_VERSION"),
-                &self.options,
-                self.options.per_call_policies.clone(),
+                &self.client_options,
+                self.client_options.per_call_policies.clone(),
                 per_retry_policies,
             ),
         }
-    }
-}
-
-impl ClientBuilder for SecretClientBuilder {
-    fn options(&mut self) -> &mut ClientOptions {
-        &mut self.options
     }
 }
 

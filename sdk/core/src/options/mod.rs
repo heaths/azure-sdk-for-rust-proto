@@ -2,7 +2,10 @@ mod retry;
 mod transport;
 
 #[cfg(feature = "builder")]
+pub use azure_core_macros::ClientBuilder;
+#[cfg(feature = "builder")]
 pub use builder::*;
+
 pub use retry::*;
 pub use transport::*;
 
@@ -45,6 +48,7 @@ impl ClientMethodOptions {
     }
 }
 
+#[cfg(feature = "builder")]
 mod builder {
     use super::*;
 
