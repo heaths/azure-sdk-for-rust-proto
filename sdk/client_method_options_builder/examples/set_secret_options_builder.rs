@@ -1,6 +1,6 @@
 use azure_core::{
-    ClientMethodOptionsBuilder as _, ClientOptionsBuilder as _, Context, ExponentialRetryOptions,
-    RetryOptions,
+    ClientMethodOptionsBuilder as _, ClientOptionsBuilder as _, Context, ContextExt,
+    ExponentialRetryOptions, RetryOptions,
 };
 use azure_identity::DefaultAzureCredential;
 use client_method_options_builder::{
@@ -29,8 +29,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("set {} version {}", secret.name, secret.version);
 
     // More complex client method call.
-    let mut ctx = Context::default();
-    ctx.insert("example".to_string());
+    let ctx = Context::default().with_retry(RetryOptions::none());
 
     let options = SetSecretOptions::builder()
         // BUGBUG: Not initially discoverable; rust-analyzer tells you want to import, but not immediately discoverable.
@@ -47,8 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("set {} version {}", secret.name, secret.version);
 
     // Concurrent client method calls with same options.
-    let mut ctx = Context::default();
-    ctx.insert("example".to_string());
+    let ctx = Context::default().with_value("example".to_string());
 
     let options = SetSecretOptions::builder()
         .with_content_type("text/plain")
