@@ -90,7 +90,7 @@ impl SecretClientOptions {
         self.api_version.as_str()
     }
 
-    pub fn builder() -> builder::SecretClientOptionsBuilder {
+    pub fn builder() -> builders::SecretClientOptionsBuilder {
         todo!()
     }
 }
@@ -125,12 +125,12 @@ impl SetSecretOptions {
         self.tags.as_ref()
     }
 
-    pub fn builder() -> builder::SetSecretOptionsBuilder {
+    pub fn builder() -> builders::SetSecretOptionsBuilder {
         todo!()
     }
 }
 
-pub mod builder {
+pub mod builders {
     use super::*;
     use azure_core::{ClientMethodOptionsBuilder, ClientOptionsBuilder};
 

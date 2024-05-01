@@ -16,7 +16,7 @@ url = { workspace = true }
 tokio = { workspace = true, features = ["time"] }
 
 [features]
-builder = []
+builders = []
 context = []
 
 [lints]
