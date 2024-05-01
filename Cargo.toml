@@ -13,6 +13,7 @@ azure_core = { version = "0.1.0", path = "sdk/core" }
 azure_identity = { version = "0.1.0", path = "sdk/identity" }
 bytes = "1.5.0"
 futures = "0.3.30"
+pin-project = "1.0"
 serde_json = "1.0.114"
 serde = { version = "1.0.197", features = ["derive"] }
 tokio = { version = "1.36.0", features = ["macros", "rt-multi-thread"] }

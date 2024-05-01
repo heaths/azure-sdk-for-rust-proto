@@ -1,6 +1,7 @@
 mod auth;
 mod context;
 mod error;
+mod etag;
 mod headers;
 pub mod json;
 mod options;
@@ -14,6 +15,7 @@ mod trace;
 pub use auth::*;
 pub use context::*;
 pub use error::*;
+pub use etag::*;
 pub use headers::*;
 pub use options::*;
 pub use pipeline::*;

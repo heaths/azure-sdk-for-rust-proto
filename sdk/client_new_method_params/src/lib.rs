@@ -4,7 +4,8 @@ mod models;
 
 use azure_core::{
     policies::{ApiKeyAuthenticationPolicy, Policy},
-    ClientOptions, Context, Pipeline, Request, Response, Result, Span, TokenCredential, Url,
+    ClientOptions, CollectedResponse, Context, Etag, Pipeline, Request, Result, Span,
+    TokenCredential, Url, ETAG, IF_MATCH, IF_NONE_MATCH,
 };
 pub use models::*;
 use std::{collections::HashMap, sync::Arc};
@@ -56,7 +57,7 @@ impl SecretClient {
         name: N,
         value: V,
         options: Option<SetSecretOptions>,
-    ) -> azure_core::Result<Response>
+    ) -> azure_core::Result<Secret>
     where
         N: Into<String>,
         V: Into<String>,
@@ -70,13 +71,26 @@ impl SecretClient {
         url.set_path(&format!("secrets/{}", name.into()));
 
         let mut request = Request::new(url, "GET");
+        // NOTE: This is done with strong types in existing code.
+        // Shown here only as demonstration.
+        if let Some(etag) = options.if_match {
+            request.insert_header(IF_MATCH, etag.to_string());
+        }
+        if let Some(etag) = options.if_none_match {
+            request.insert_header(IF_NONE_MATCH, etag.to_string());
+        }
         request.set_json(&SetSecretRequest {
             value: value.into(),
             properties: options.properties,
             ..Default::default()
         })?;
 
-        self.pipeline.send(&mut ctx, &mut request).await
+        let response = self.pipeline.send(&mut ctx, &mut request).await?;
+        let response = CollectedResponse::from_response(response).await?;
+        let mut secret: Secret = response.json()?;
+        secret.etag = response.headers().get_optional_str(&ETAG).map(Etag::from);
+        secret._raw_response = Some(response);
+        Ok(secret)
     }
 }
 
@@ -101,4 +115,6 @@ pub struct SetSecretOptions {
     pub content_type: Option<String>,
     pub tags: Option<HashMap<String, String>>,
     pub context: Option<Context>,
+    pub if_match: Option<Etag>,
+    pub if_none_match: Option<Etag>,
 }

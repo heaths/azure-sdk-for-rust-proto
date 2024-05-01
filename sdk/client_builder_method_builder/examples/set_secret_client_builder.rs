@@ -16,6 +16,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Simple client method call.
     let response = client
         .set_secret("secret-name", "secret-value")
+        // TODO: Alternatively, we could have a get_response() that returns a Result<Response<T>> while send() returns a Result<T>.
         .send()
         .await?;
 
