@@ -6,6 +6,7 @@ publish = false
 
 [dependencies]
 async-trait = { workspace = true }
+azure_core_macros = { workspace = true }
 bytes = { workspace = true }
 futures = { workspace = true }
 serde = { workspace = true }
