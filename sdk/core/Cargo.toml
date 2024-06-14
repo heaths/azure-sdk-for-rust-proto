@@ -15,9 +15,5 @@ url = { workspace = true }
 [dev-dependencies]
 tokio = { workspace = true, features = ["time"] }
 
-[features]
-builders = []
-context = []
-
 [lints]
 workspace = true
