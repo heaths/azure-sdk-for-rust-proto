@@ -35,58 +35,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d468802bab17cbc0cc575e9b053f41e72aa36bfa6b7f55e3529ffa43161b97fa"
 
 [[package]]
-name = "azure_client_builder_method_builder"
-version = "0.1.0"
-dependencies = [
- "azure_core",
- "azure_identity",
- "futures",
- "serde",
- "tokio",
-]
-
-[[package]]
-name = "azure_client_new_method_builder"
-version = "0.1.0"
-dependencies = [
- "azure_core",
- "azure_identity",
- "futures",
- "serde",
- "tokio",
-]
-
-[[package]]
-name = "azure_client_new_methods_params"
-version = "0.1.0"
-dependencies = [
- "azure_core",
- "azure_identity",
- "serde",
- "tokio",
-]
-
-[[package]]
-name = "azure_client_new_methods_params_context"
-version = "0.1.0"
-dependencies = [
- "azure_core",
- "azure_identity",
- "serde",
- "tokio",
-]
-
-[[package]]
-name = "azure_client_new_methods_params_struct"
-version = "0.1.0"
-dependencies = [
- "azure_core",
- "azure_identity",
- "serde",
- "tokio",
-]
-
-[[package]]
 name = "azure_core"
 version = "0.1.0"
 dependencies = [
@@ -104,6 +52,16 @@ name = "azure_identity"
 version = "0.1.0"
 dependencies = [
  "azure_core",
+]
+
+[[package]]
+name = "azure_security_keyvault"
+version = "0.1.0"
+dependencies = [
+ "azure_core",
+ "azure_identity",
+ "serde",
+ "tokio",
 ]
 
 [[package]]
@@ -138,16 +96,6 @@ name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
-
-[[package]]
-name = "client_method_options_builder"
-version = "0.1.0"
-dependencies = [
- "azure_core",
- "azure_identity",
- "serde",
- "tokio",
-]
 
 [[package]]
 name = "form_urlencoded"

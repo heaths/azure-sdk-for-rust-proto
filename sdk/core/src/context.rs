@@ -17,10 +17,9 @@ impl Context {
         }
     }
 
-    #[cfg(feature = "context")]
     pub fn with_context(parent: &Context) -> Self {
-        // Go does no copy context values, but they are practically read-only.
-        // Cloning the HashMap isn't the cheapest solution but doe effectively handle overrides e.g., replacing an existing entity.
+        // Go does not copy context values, but they are practically read-only.
+        // Cloning the HashMap isn't the cheapest solution but does effectively handle overrides e.g., replacing an existing entity.
         // See https://cs.opensource.google/go/go/+/refs/tags/go1.22.0:src/context/context.go for Go's implementation.
         Self {
             type_map: parent.type_map.clone(),

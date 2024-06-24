@@ -1,8 +1,11 @@
-use azure_client_new_methods_params::{
+use azure_core::{
+    ClientMethodOptionsBuilder, ClientOptionsBuilder, Context, ExponentialRetryOptions,
+    RetryOptions,
+};
+use azure_identity::DefaultAzureCredential;
+use azure_security_keyvault::{
     Secret, SecretClient, SecretClientOptions, SecretProperties, SetSecretOptions,
 };
-use azure_core::{ClientOptions, Context, ExponentialRetryOptions, RetryOptions};
-use azure_identity::DefaultAzureCredential;
 use std::{env, sync::Arc};
 
 #[tokio::main]
@@ -10,13 +13,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let endpoint = env::var("AZURE_KEYVAULT_URL")?;
 
     let credential = Arc::new(DefaultAzureCredential::default());
-    let options = SecretClientOptions {
-        api_version: "7.4".to_string(),
-        options: ClientOptions {
-            retry: RetryOptions::exponential(ExponentialRetryOptions {}),
-            ..Default::default()
-        },
-    };
+    let options = SecretClientOptions::builder()
+        .with_api_version("7.4")
+        .with_retry(RetryOptions::exponential(ExponentialRetryOptions::default()))
+        .build();
     let client = SecretClient::new(endpoint, credential, Some(options))?;
 
     // Simple client method call.
@@ -31,16 +31,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut ctx = Context::default();
     ctx.insert("example".to_string());
 
+    let options = SetSecretOptions::builder()
+        .with_context(ctx)
+        .with_properties(SecretProperties { enabled: false })
+        .build();
     let response = client
-        .set_secret(
-            "secret-name",
-            "rotated-value",
-            Some(SetSecretOptions {
-                context: Some(ctx),
-                properties: Some(SecretProperties { enabled: false }),
-                ..Default::default()
-            }),
-        )
+        .set_secret("secret-name", "rotated-value", Some(options))
         .await?;
 
     // Option 2: Implement async TryFrom<Response> for models, which customers can also do. Options are not mutually exclusive.
@@ -52,11 +48,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut ctx = Context::default();
     ctx.insert("example".to_string());
 
-    let options = SetSecretOptions {
-        content_type: Some("text/plain".to_string()),
-        context: Some(ctx),
-        ..Default::default()
-    };
+    let options = SetSecretOptions::builder()
+        .with_content_type("text/plain")
+        // BUGBUG: Not initially discoverable; rust-analyzer tells you want to import, but not immediately discoverable.
+        .with_context(ctx)
+        .build();
 
     let (_, _) = tokio::join!(
         client.set_secret("foo", "foo-value", Some(options.clone())),
